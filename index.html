@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GraviBoxes">
+<meta name="theme-color" content="#0f0f14">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>GraviBoxes</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0f0f14;
+    --safe-top: env(safe-area-inset-top, 44px);
+    --safe-bottom: env(safe-area-inset-bottom, 34px);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+    font-family: -apple-system, 'SF Pro Display', sans-serif;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Splash ── */
+  #splash {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    z-index: 100;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  #splash.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+  .splash-icon {
+    width: 96px; height: 96px;
+    position: relative;
+    animation: splashSpin 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes splashSpin {
+    from { transform: scale(0) rotate(-30deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+  }
+  .splash-icon .si { position: absolute; border-radius: 14px; }
+
+  .splash-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+    animation: fadeUp 0.5s 0.3s both;
+  }
+  .splash-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    animation: fadeUp 0.5s 0.45s both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header ── */
+  #header {
+    padding: calc(var(--safe-top) + 10px) 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+  }
+  #header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.88);
+    letter-spacing: -0.3px;
+  }
+  .header-btns { display: flex; gap: 8px; }
+  .hbtn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.65);
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .hbtn:active { background: rgba(255,255,255,0.18); transform: scale(0.92); }
+  .hbtn.active { background: rgba(79,172,254,0.25); color: #4FACFE; }
+
+  /* ── Canvas ── */
+  #canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100%; height: 100%;
+  }
+
+  /* ── Footer ── */
+  #footer {
+    padding: 8px 20px calc(var(--safe-bottom) + 6px);
+    text-align: center;
+    color: rgba(255,255,255,0.2);
+    font-size: 11px;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Gyro prompt (iOS) ── */
+  #gyro-prompt {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 50;
+    padding-bottom: calc(var(--safe-bottom) + 20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #gyro-prompt.show { opacity: 1; pointer-events: all; }
+  .gp-card {
+    background: #1c1c1e;
+    border-radius: 20px;
+    padding: 24px 24px 20px;
+    width: calc(100% - 32px);
+    max-width: 400px;
+    text-align: center;
+  }
+  .gp-icon { font-size: 44px; margin-bottom: 12px; }
+  .gp-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .gp-desc  { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 20px; line-height: 1.5; }
+  .gp-btn {
+    width: 100%; padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: #4FACFE;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: opacity 0.15s;
+  }
+  .gp-btn:active { opacity: 0.8; }
+  .gp-skip {
+    background: none; border: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 14px; cursor: pointer;
+    padding: 8px;
+  }
+
+  /* ── Install banner ── */
+  #install-bar {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 60px);
+    left: 50%; transform: translateX(-50%);
+    background: rgba(28,28,30,0.95);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 20;
+    max-width: calc(100% - 32px);
+    backdrop-filter: blur(20px);
+    animation: slideUp 0.4s 2s both;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  #install-bar .ib-icon { font-size: 20px; flex-shrink: 0; }
+  #install-bar .ib-close {
+    margin-left: 8px; background: none; border: none;
+    color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* Stars */
+  .star { position: absolute; border-radius: 50%; background: white; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-icon" id="splashIcon"></div>
+  <div class="splash-title">GraviBoxes</div>
+  <div class="splash-sub">倾斜 · 弹跳 · 玩转重力</div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <div id="header">
+    <h1>GraviBoxes</h1>
+    <div class="header-btns">
+      <button class="hbtn" id="gyroBtn" title="陀螺仪">📱</button>
+      <button class="hbtn" id="shakeBtn" title="抖一抖">💨</button>
+    </div>
+  </div>
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+  <div id="footer">倾斜手机改变重力 · 拖动方块</div>
+</div>
+
+<!-- Gyro Permission Prompt (iOS) -->
+<div id="gyro-prompt">
+  <div class="gp-card">
+    <div class="gp-icon">📱</div>
+    <div class="gp-title">开启陀螺仪</div>
+    <div class="gp-desc">允许 GraviBoxes 访问设备运动传感器<br>让方块跟随手机真实倾斜</div>
+    <button class="gp-btn" id="gyroAllowBtn">允许访问传感器</button>
+    <button class="gp-skip" id="gyroSkipBtn">稍后再说</button>
+  </div>
+</div>
+
+<!-- iOS Install Hint -->
+<div id="install-bar" style="display:none">
+  <span class="ib-icon">⬆️</span>
+  <span>点击分享按钮 → 添加到主屏幕，像 App 一样使用</span>
+  <button class="ib-close" id="installClose">✕</button>
+</div>
+
+<script>
+// ── Colors ──────────────────────────────────────────────
+const COLORS = [
+  '#FF6B6B','#FF8E53','#FFC23E','#FFE66D',
+  '#A8FF78','#43E97B','#38F9D7','#4FACFE',
+  '#667EEA','#A855F7','#F953C6','#FF6CAB',
+  '#FC5C7D','#6A82FB','#00CDAC','#02AAB0',
+  '#F7971E','#FFD200','#21D4FD','#B721FF',
+  '#08AEEA','#2AF598','#FD1D1D','#FCB045'
+];
+
+// ── Splash icon ──────────────────────────────────────────
+(function() {
+  const icon = document.getElementById('splashIcon');
+  const positions = [
+    [0,0],[42,0],[84,0],[0,42],[42,42],[84,42],[0,84],[42,84],[84,84]
+  ];
+  positions.forEach(([x,y], i) => {
+    const d = document.createElement('div');
+    d.className = 'si';
+    d.style.cssText = `width:38px;height:38px;left:${x}px;top:${y}px;background:${COLORS[i*2]};animation:splashSpin ${0.6+i*0.04}s cubic-bezier(0.34,1.56,0.64,1) both;animation-delay:${i*0.04}s`;
+    icon.appendChild(d);
+  });
+})();
+
+// ── Stars background ─────────────────────────────────────
+(function() {
+  const wrap = document.getElementById('canvas-wrap');
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 1.5 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.2+0.04}`;
+    wrap.appendChild(s);
+  }
+})();
+
+// ── Physics ──────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+let W, H;
+const BOX = 56, RADIUS = 11;
+let gravity = { x: 0, y: 1 };
+let boxes = [];
+let gyroOn = false;
+let dragging = null;
+let lastTouch = null;
+
+function resize() {
+  const rect = wrap.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+  canvas.width = W * devicePixelRatio;
+  canvas.height = H * devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+}
+
+function initBoxes() {
+  const gap = 10;
+  const cols = Math.floor((W - 20) / (BOX + gap));
+  boxes = COLORS.map((color, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    return {
+      id: i, color,
+      x: 18 + col * (BOX + gap) + BOX/2,
+      y: 24 + row * (BOX + gap) + BOX/2,
+      vx: (Math.random() - 0.5) * 2,
+      vy: 0,
+      angle: 0,
+      av: 0
+    };
+  });
+}
+
+const RESTITUTION = 0.4;
+const FRICTION = 0.82;
+const AIR = 0.979;
+const G_SCALE = 14;
+
+function step() {
+  const half = BOX / 2;
+  for (let b of boxes) {
+    if (dragging && dragging.id === b.id) continue;
+    b.vx += gravity.x * G_SCALE * 0.016;
+    b.vy += gravity.y * G_SCALE * 0.016;
+    b.vx *= AIR; b.vy *= AIR; b.av *= 0.97;
+    b.x += b.vx; b.y += b.vy;
+    b.angle += b.av;
+
+    // Walls
+    if (b.x - half < 0)  { b.x = half;    b.vx =  Math.abs(b.vx) * RESTITUTION; b.vy *= FRICTION; b.av += b.vy * 0.004; }
+    if (b.x + half > W)  { b.x = W - half; b.vx = -Math.abs(b.vx) * RESTITUTION; b.vy *= FRICTION; b.av -= b.vy * 0.004; }
+    if (b.y - half < 0)  { b.y = half;    b.vy =  Math.abs(b.vy) * RESTITUTION; b.vx *= FRICTION; }
+    if (b.y + half > H)  { b.y = H - half; b.vy = -Math.abs(b.vy) * RESTITUTION; b.vx *= FRICTION; b.av += b.vx * 0.004; }
+  }
+
+  // Box-box collisions
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const min = BOX * 0.9;
+      if (dist < min && dist > 0.001) {
+        const nx = dx/dist, ny = dy/dist;
+        const sep = (min - dist) / 2;
+        if (!dragging || dragging.id !== a.id) { a.x -= nx*sep; a.y -= ny*sep; }
+        if (!dragging || dragging.id !== b.id) { b.x += nx*sep; b.y += ny*sep; }
+        const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
+        const dot = rvx*nx + rvy*ny;
+        if (dot < 0) {
+          const imp = dot * 0.65;
+          a.vx += imp*nx; a.vy += imp*ny;
+          b.vx -= imp*nx; b.vy -= imp*ny;
+          const spin = (rvx*ny - rvy*nx) * 0.003;
+          a.av -= spin; b.av += spin;
+        }
+      }
+    }
+  }
+}
+
+function drawRoundedRect(x, y, w, h, r, color) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  const half = BOX / 2;
+
+  for (const b of boxes) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.angle);
+
+    // Shadow glow
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur = dragging && dragging.id === b.id ? 22 : 10;
+
+    drawRoundedRect(-half, -half, BOX, BOX, RADIUS, b.color);
+
+    ctx.shadowBlur = 0;
+
+    // Shine highlight
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(-half+4, -half+3, BOX-8, BOX*0.36, 7);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(-half, -half, BOX, BOX);
+    ctx.restore();
+
+    // Drag indicator
+    if (dragging && dragging.id === b.id) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-half-3, -half-3, BOX+6, BOX+6, RADIUS+3);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+function loop() {
+  step();
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ── Init ─────────────────────────────────────────────────
+window.addEventListener('resize', () => { resize(); initBoxes(); });
+resize();
+initBoxes();
+
+// Hide splash after 1.8s
+setTimeout(() => {
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(() => document.getElementById('splash').remove(), 600);
+}, 1800);
+
+loop();
+
+// ── Touch / Mouse input ───────────────────────────────────
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+
+function findBox(px, py) {
+  for (let i = boxes.length-1; i >= 0; i--) {
+    const b = boxes[i];
+    if (Math.abs(px - b.x) < BOX/2 && Math.abs(py - b.y) < BOX/2) return b;
+  }
+  return null;
+}
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const p = getPos(e);
+  const b = findBox(p.x, p.y);
+  if (b) { dragging = b; lastTouch = p; }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const p = getPos(e);
+  if (dragging) {
+    dragging.vx = (p.x - lastTouch.x) * 0.6;
+    dragging.vy = (p.y - lastTouch.y) * 0.6;
+    dragging.x = p.x; dragging.y = p.y;
+    lastTouch = p;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (dragging) {
+    dragging.vx *= 1.4; dragging.vy *= 1.4;
+    dragging.av = (dragging.vx + dragging.vy) * 0.006;
+    dragging = null;
+  }
+}, { passive: false });
+
+canvas.addEventListener('mousemove', e => {
+  if (!e.buttons) {
+    // Tilt via mouse position (desktop)
+    const rect = canvas.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / W * 2 - 1;
+    const ny = (e.clientY - rect.top)  / H * 2 - 1;
+    if (!gyroOn) { gravity.x = nx * 1.4; gravity.y = ny * 1.4; }
+    return;
+  }
+  if (dragging) {
+    const p = getPos(e);
+    dragging.vx = (p.x - dragging.x) * 0.6;
+    dragging.vy = (p.y - dragging.y) * 0.6;
+    dragging.x = p.x; dragging.y = p.y;
+  }
+});
+
+canvas.addEventListener('mousedown', e => {
+  const p = getPos(e);
+  dragging = findBox(p.x, p.y);
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (dragging) {
+    dragging.vx *= 1.4; dragging.vy *= 1.4;
+    dragging = null;
+  }
+});
+
+// ── Shake button ──────────────────────────────────────────
+document.getElementById('shakeBtn').addEventListener('click', () => {
+  boxes.forEach(b => {
+    b.vx = (Math.random()-0.5) * 36;
+    b.vy = (Math.random()-0.5) * 36;
+    b.av = (Math.random()-0.5) * 0.4;
+  });
+});
+
+// ── Gyroscope ─────────────────────────────────────────────
+const gyroBtn = document.getElementById('gyroBtn');
+const gyroPrompt = document.getElementById('gyro-prompt');
+
+function enableGyro() {
+  window.addEventListener('deviceorientation', e => {
+    if (!gyroOn) return;
+    gravity.x =  Math.sin((e.gamma || 0) * Math.PI / 180) * 2;
+    gravity.y = -Math.sin((e.beta  || 0) * Math.PI / 180) * 2;
+  });
+  gyroOn = true;
+  gyroBtn.classList.add('active');
+  gyroBtn.textContent = '🌀';
+}
+
+gyroBtn.addEventListener('click', async () => {
+  if (gyroOn) {
+    gyroOn = false;
+    gyroBtn.classList.remove('active');
+    gyroBtn.textContent = '📱';
+    gravity = { x: 0, y: 1 };
+    return;
+  }
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+ needs permission
+    gyroPrompt.classList.add('show');
+  } else {
+    enableGyro();
+  }
+});
+
+document.getElementById('gyroAllowBtn').addEventListener('click', async () => {
+  gyroPrompt.classList.remove('show');
+  try {
+    const perm = await DeviceOrientationEvent.requestPermission();
+    if (perm === 'granted') enableGyro();
+  } catch(e) { enableGyro(); }
+});
+
+document.getElementById('gyroSkipBtn').addEventListener('click', () => {
+  gyroPrompt.classList.remove('show');
+});
+
+// ── PWA install hint (iOS Safari) ────────────────────────
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone;
+const installBar = document.getElementById('install-bar');
+if (isIOS && !isStandalone) {
+  installBar.style.display = 'flex';
+  document.getElementById('installClose').addEventListener('click', () => {
+    installBar.style.display = 'none';
+  });
+}
+
+// ── Service Worker ────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
