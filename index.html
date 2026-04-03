@@ -232,6 +232,7 @@ const {Engine,Runner,Bodies,Body,World,Events,Mouse,MouseConstraint,Composite}=M
 let engine, mRunner, iconBodies=[], walls=[];
 let W, H;
 let gyroOn=false, gyroListenerAdded=false;
+let magnetActive=false, magnetX=0, magnetY=0;
 let mode='grid'; // 'grid' | 'physics' | 'homing'
 
 const canvas=document.getElementById('c');
@@ -335,6 +336,20 @@ function initPhysics(){
   });
   World.add(engine.world,iconBodies);
 
+  // Magnet force applied each tick
+  Events.on(engine,'beforeUpdate',()=>{
+    if(!magnetActive||mode!=='physics') return;
+    const gravScale=engine.gravity.scale||0.001;
+    const gravMag=Math.sqrt(engine.gravity.x**2+engine.gravity.y**2)||1;
+    iconBodies.forEach(b=>{
+      const dx=magnetX-b.position.x, dy=magnetY-b.position.y;
+      const dist=Math.sqrt(dx*dx+dy*dy)+1;
+      // Force = 2x gravity magnitude, toward touch point
+      const f=gravMag*0.0004*2;
+      Body.applyForce(b,b.position,{x:(dx/dist)*f*b.mass,y:(dy/dist)*f*b.mass});
+    });
+  });
+
   // Touch drag
   const mouse=Mouse.create(canvas);
   mouse.pixelRatio=devicePixelRatio;
@@ -368,44 +383,47 @@ function goPhysics(){
 }
 
 // ─── HOME (spring back) ──────────────────────
-let homingUnsub=null;
+let homingUnsub=null, homingTimeout=null;
 function goHome(){
   if(mode==='homing') return;
   mode='homing';
+  magnetActive=false;
   engine.gravity.x=0; engine.gravity.y=0;
   const targets=homePos(W,H);
   setBadge('🏠 归位中…','rgba(255,210,60,.9)');
-
-  if(homingUnsub) Events.off(engine,'beforeUpdate',homingUnsub);
+  if(homingUnsub){Events.off(engine,'beforeUpdate',homingUnsub);homingUnsub=null;}
+  clearTimeout(homingTimeout);
+  let ticks=0;
   homingUnsub=()=>{
+    ticks++;
     let done=true;
     iconBodies.forEach((b,i)=>{
-      const dx=targets[i].x-b.position.x;
-      const dy=targets[i].y-b.position.y;
-      // Spring
+      const dx=targets[i].x-b.position.x, dy=targets[i].y-b.position.y;
       Body.applyForce(b,b.position,{x:dx*.009,y:dy*.009});
-      // Damp velocity
       Body.setVelocity(b,{x:b.velocity.x*.82,y:b.velocity.y*.82});
       Body.setAngularVelocity(b,b.angularVelocity*.75);
       Body.setAngle(b,b.angle*.88);
       if(Math.sqrt(dx*dx+dy*dy)>2||Math.abs(b.velocity.x)+Math.abs(b.velocity.y)>.3) done=false;
     });
-    if(done){
-      Events.off(engine,'beforeUpdate',homingUnsub);
-      iconBodies.forEach((b,i)=>{
-        Body.setPosition(b,{x:targets[i].x,y:targets[i].y});
-        Body.setVelocity(b,{x:0,y:0});
-        Body.setAngle(b,0);
-        Body.setAngularVelocity(b,0);
-      });
-      mode='physics';
-      // Restore gravity after homing
-      engine.gravity.x=0;
-      engine.gravity.y= gyroOn ? 0 : 1;
-      setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
-    }
+    if(done||ticks>180) finishHoming(targets);
   };
   Events.on(engine,'beforeUpdate',homingUnsub);
+  homingTimeout=setTimeout(()=>finishHoming(targets),3500);
+}
+function finishHoming(targets){
+  if(!homingUnsub) return; // already finished
+  Events.off(engine,'beforeUpdate',homingUnsub); homingUnsub=null;
+  clearTimeout(homingTimeout);
+  iconBodies.forEach((b,i)=>{
+    Body.setPosition(b,{x:targets[i].x,y:targets[i].y});
+    Body.setVelocity(b,{x:0,y:0});
+    Body.setAngle(b,0);
+    Body.setAngularVelocity(b,0);
+  });
+  mode='physics';
+  engine.gravity.x=0;
+  engine.gravity.y=gyroOn?0:1;
+  setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
 }
 
 // ─── SHAKE ALL ───────────────────────────────
@@ -425,15 +443,17 @@ function enableGyro(){
   if(!gyroListenerAdded){
     gyroListenerAdded=true;
     window.addEventListener('deviceorientation',e=>{
-      if(!gyroOn||mode==='homing') return;
+      if(!gyroOn||mode==='homing'||mode==='magnet') return;
       engine.gravity.x=Math.sin((e.gamma||0)*Math.PI/180);
-      engine.gravity.y=Math.sin((e.beta||0) *Math.PI/180);
+      engine.gravity.y=Math.sin((e.beta||0)*Math.PI/180);
     });
   }
   gyroOn=true;
   document.getElementById('gyroBtn').classList.add('on');
   document.getElementById('gyroBtn').textContent='🌀';
-  if(mode==='physics') setBadge('🌀 陀螺仪','rgba(100,220,100,.85)');
+  // Auto-start physics immediately — no need to press 🏠
+  if(mode==='grid') goPhysics();
+  else setBadge('🌀 陀螺仪','rgba(100,220,100,.85)');
 }
 function disableGyro(){
   gyroOn=false;
@@ -474,6 +494,46 @@ document.getElementById('homeBtn').addEventListener('click',()=>{
 canvas.addEventListener('mousemove',e=>{
   if(!engine||!gyroOn||mode==='homing') return;
   // On desktop without gyro, mouse position drives gravity
+});
+
+// ─── MAGNET (touch to attract) ──────────────
+function getCanvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  const src=e.touches?e.touches[0]:e;
+  return{x:src.clientX-r.left,y:src.clientY-r.top};
+}
+canvas.addEventListener('touchstart',e=>{
+  if(mode!=='physics') return;
+  e.preventDefault();
+  const p=getCanvasPos(e);
+  magnetActive=true; magnetX=p.x; magnetY=p.y;
+  setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  if(!magnetActive) return;
+  e.preventDefault();
+  const p=getCanvasPos(e);
+  magnetX=p.x; magnetY=p.y;
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  magnetActive=false;
+  if(mode==='physics') setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
+},{passive:false});
+// Desktop: click-hold to magnet
+canvas.addEventListener('mousedown',e=>{
+  if(mode!=='physics') return;
+  const p=getCanvasPos(e);
+  magnetActive=true; magnetX=p.x; magnetY=p.y;
+  setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
+});
+canvas.addEventListener('mousemove',e=>{
+  if(!magnetActive) return;
+  const p=getCanvasPos(e);
+  magnetX=p.x; magnetY=p.y;
+});
+canvas.addEventListener('mouseup',()=>{
+  magnetActive=false;
+  if(mode==='physics') setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
 });
 
 // ─── SHAKE DETECTION ─────────────────────────
