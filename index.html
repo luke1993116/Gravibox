@@ -18,7 +18,7 @@
 }
 html,body{
   width:100%;height:100%;background:#1c1c1e;
-  overflow:hidden;font-family:-apple-system,'SF Pro Display',sans-serif;
+  overflow:hidden;font-family:-apple-system,sans-serif;
   touch-action:none;user-select:none;-webkit-user-select:none;
 }
 #app{position:fixed;inset:0;display:flex;flex-direction:column;}
@@ -31,10 +31,10 @@ html,body{
 }
 #splash.hide{opacity:0;transform:scale(1.06);pointer-events:none;}
 .sp-grid{display:grid;grid-template-columns:repeat(3,52px);gap:8px;animation:popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;}
-@keyframes popIn{from{transform:scale(0.4) rotate(-10deg);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes popIn{from{transform:scale(0.4)rotate(-10deg);opacity:0}to{transform:scale(1);opacity:1}}
 .sp-ic{width:52px;height:52px;border-radius:13px;}
-.sp-title{font-size:30px;font-weight:700;color:#fff;letter-spacing:-0.5px;animation:fadeUp 0.5s 0.3s both;}
-.sp-sub{font-size:13px;color:rgba(255,255,255,0.4);animation:fadeUp 0.5s 0.45s both;}
+.sp-title{font-size:30px;font-weight:700;color:#fff;letter-spacing:-.5px;animation:fadeUp .5s .3s both;}
+.sp-sub{font-size:13px;color:rgba(255,255,255,.4);animation:fadeUp .5s .45s both;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* Header */
@@ -42,68 +42,70 @@ html,body{
   padding:calc(var(--safe-top)+8px) 16px 6px;
   display:flex;align-items:center;justify-content:space-between;z-index:10;flex-shrink:0;
 }
-#header h1{font-size:17px;font-weight:700;color:rgba(255,255,255,0.88);letter-spacing:-0.3px;}
+#header h1{font-size:17px;font-weight:700;color:rgba(255,255,255,.88);letter-spacing:-.3px;}
 .hbtns{display:flex;gap:7px;}
 .hbtn{
   width:34px;height:34px;border-radius:50%;border:none;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.65);
   font-size:14px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:background 0.15s,transform 0.1s;
+  cursor:pointer;transition:background .15s,transform .1s;
 }
-.hbtn:active{background:rgba(255,255,255,0.22);transform:scale(0.9);}
-.hbtn.on{background:rgba(100,200,100,0.25);color:#66dd66;}
+.hbtn:active{background:rgba(255,255,255,.22);transform:scale(.9);}
+.hbtn.on{background:rgba(100,200,100,.25);color:#66dd66;}
 
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
-canvas{display:block;width:100%;height:100%;}
+canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0;}
+#c-bg{z-index:0;}   /* background / effects layer */
+#c-main{z-index:1;} /* icons layer */
 
-#footer{padding:4px 16px calc(var(--safe-bottom)+3px);text-align:center;font-size:10px;color:rgba(255,255,255,0.18);flex-shrink:0;}
+#footer{padding:4px 16px calc(var(--safe-bottom)+3px);text-align:center;font-size:10px;color:rgba(255,255,255,.18);flex-shrink:0;}
 
-/* Mode badge */
+/* Badge */
 #mode-badge{
   position:absolute;top:8px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.5);border-radius:20px;padding:3px 12px;
-  font-size:11px;color:rgba(255,255,255,0.55);pointer-events:none;
-  transition:color 0.3s;white-space:nowrap;display:none;
+  background:rgba(0,0,0,.5);border-radius:20px;padding:3px 12px;
+  font-size:11px;color:rgba(255,255,255,.55);pointer-events:none;
+  transition:color .3s;white-space:nowrap;display:none;z-index:5;
 }
+
+/* Grid overlay */
+#grid-overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  transition:opacity .5s ease;overflow:hidden;z-index:3;
+}
+#grid-overlay.hidden{opacity:0;pointer-events:none;}
+.hint-pulse{
+  margin-top:8px;font-size:11px;color:rgba(255,255,255,.32);white-space:nowrap;
+  animation:pulse 2.2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:.32}50%{opacity:.7}}
 
 /* Gyro prompt */
 #gyro-prompt{
-  position:fixed;inset:0;background:rgba(0,0,0,0.72);
+  position:fixed;inset:0;background:rgba(0,0,0,.72);
   display:flex;align-items:flex-end;justify-content:center;
   padding-bottom:calc(var(--safe-bottom)+20px);
-  z-index:50;opacity:0;pointer-events:none;transition:opacity 0.3s;
+  z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;
 }
 #gyro-prompt.show{opacity:1;pointer-events:all;}
 .gp-card{background:#2c2c2e;border-radius:20px;padding:28px 24px 20px;width:calc(100% - 32px);max-width:400px;text-align:center;}
 .gp-icon{font-size:48px;margin-bottom:12px;}
 .gp-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
-.gp-desc{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:22px;line-height:1.6;}
+.gp-desc{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:22px;line-height:1.6;}
 .gp-btn{width:100%;padding:14px;border-radius:14px;border:none;background:#30d158;color:#fff;font-size:17px;font-weight:600;cursor:pointer;margin-bottom:10px;}
-.gp-skip{background:none;border:none;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;padding:8px;}
-
-/* Grid overlay */
-#grid-overlay{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  transition:opacity 0.5s ease;overflow:hidden;
-}
-#grid-overlay.hidden{opacity:0;pointer-events:none;}
-.hint-pulse{
-  margin-top:10px;font-size:11px;color:rgba(255,255,255,0.32);white-space:nowrap;
-  animation:pulse 2.2s infinite;
-}
-@keyframes pulse{0%,100%{opacity:0.32}50%{opacity:0.7}}
+.gp-skip{background:none;border:none;color:rgba(255,255,255,.35);font-size:14px;cursor:pointer;padding:8px;}
 
 /* Install bar */
 #install-bar{
   position:fixed;bottom:calc(var(--safe-bottom)+56px);left:50%;transform:translateX(-50%);
-  background:rgba(44,44,46,0.96);border:1px solid rgba(255,255,255,0.1);
+  background:rgba(44,44,46,.96);border:1px solid rgba(255,255,255,.1);
   border-radius:14px;padding:9px 14px;
   display:flex;align-items:center;gap:10px;z-index:20;
-  max-width:calc(100% - 32px);font-size:11px;color:rgba(255,255,255,0.7);
-  white-space:nowrap;animation:slideUp 0.4s 2.5s both;
+  max-width:calc(100% - 32px);font-size:11px;color:rgba(255,255,255,.7);
+  white-space:nowrap;animation:slideUp .4s 2.5s both;
 }
 @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.ib-close{margin-left:4px;background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:15px;}
+.ib-close{margin-left:4px;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:15px;}
 </style>
 </head>
 <body>
@@ -111,7 +113,7 @@ canvas{display:block;width:100%;height:100%;}
 <div id="splash">
   <div class="sp-grid" id="spGrid"></div>
   <div class="sp-title">GraviIcons</div>
-  <div class="sp-sub">开启陀螺仪，让图标随重力飞起来</div>
+  <div class="sp-sub">摇手机 · 倾斜 · 真实物理</div>
 </div>
 
 <div id="app">
@@ -123,21 +125,22 @@ canvas{display:block;width:100%;height:100%;}
     </div>
   </div>
   <div id="canvas-wrap">
+    <canvas id="c-bg"></canvas>
+    <canvas id="c-main"></canvas>
     <div id="grid-overlay">
       <div id="grid-rows"></div>
-      <div class="hint-pulse">开启陀螺仪后图标随重力滑动</div>
+      <div class="hint-pulse">开启陀螺仪后图标随重力掉落堆叠</div>
     </div>
-    <canvas id="c" style="display:none"></canvas>
     <div id="mode-badge"></div>
   </div>
-  <div id="footer">长按磁吸 · 🏠归位 · 摇手机归位</div>
+  <div id="footer">倾斜手机 · 摇动甩飞 · 再摇归位</div>
 </div>
 
 <div id="gyro-prompt">
   <div class="gp-card">
     <div class="gp-icon">📱</div>
     <div class="gp-title">开启陀螺仪</div>
-    <div class="gp-desc">倾斜手机让图标像冰块滑动<br>长按屏幕触发核聚变磁吸 · 摇手机归位</div>
+    <div class="gp-desc">倾斜手机，图标像积木一样掉落堆叠<br>摇一下甩飞 · 摇两下归位</div>
     <button class="gp-btn" id="gyroAllowBtn">✦ 开启并体验</button>
     <button class="gp-skip" id="gyroSkipBtn">稍后再说</button>
   </div>
@@ -148,51 +151,12 @@ canvas{display:block;width:100%;height:100%;}
   <button class="ib-close" id="installClose">✕</button>
 </div>
 
+<!-- Matter.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
 <script>
 // ═══════════════════════════════════════════════════════════
-// iPhone grid specs (from reference, scaled to CSS px at ~3x)
-// Reference uses pt; we map 1pt ≈ 2px for typical 390pt-wide phone
-// We'll compute dynamically based on actual screen width
-// ═══════════════════════════════════════════════════════════
-
-// iPhone layout constants (in pt, 1pt = ~1 CSS px on non-retina web)
-// For 390pt wide (iPhone 14): icon=60pt, hgap=18pt, vgap=23pt, margin=20pt
-// We scale all proportionally to actual canvas width
-const COLS = 4;
-
-function computeLayout(canvasW, canvasH) {
-  // Scale factor: reference is 390pt wide with 20pt margins and 4 cols
-  const scale = canvasW / 390;
-  const iconPt  = 60 * scale;        // icon size
-  const hGapPt  = 18 * scale;        // horizontal gap between icons
-  const vGapPt  = 23 * scale;        // vertical gap (icon bottom to next icon top)
-  const marginPt = 20 * scale;       // left/right margin
-  const labelH   = 18 * scale;       // label area height below icon
-
-  // Cell = icon + label + vgap
-  const cellW = iconPt + hGapPt;
-  const cellH = iconPt + labelH + vGapPt;
-
-  // Grid top start (after safe area approximation)
-  const topPad = 62 * scale;
-
-  return { iconPt, hGapPt, vGapPt, marginPt, labelH, cellW, cellH, topPad, scale };
-}
-
-function computeHomePositions(canvasW, canvasH) {
-  const L = computeLayout(canvasW, canvasH);
-  const totalW = COLS * L.iconPt + (COLS-1) * L.hGapPt;
-  const startX = (canvasW - totalW) / 2 + L.iconPt/2;
-  const startY = L.topPad + L.iconPt/2;
-
-  return ICONS.map((_,i) => ({
-    x: startX + (i % COLS) * (L.iconPt + L.hGapPt),
-    y: startY + Math.floor(i / COLS) * (L.iconPt + L.labelH + L.vGapPt)
-  }));
-}
-
-// ═══════════════════════════════════════════════════════════
-// ICONS
+// ICON DEFINITIONS + DRAWING
 // ═══════════════════════════════════════════════════════════
 const ICONS = [
   {label:'商店',  grad:['#1a8cff','#0055cc'], draw:drawStore},
@@ -253,13 +217,12 @@ function drawFlash(c,s){c.fillStyle='#777';rc(c,s*.38,s*.14,s*.24,s*.58,s*.09);c
 // ═══════════════════════════════════════════════════════════
 // PRE-RENDER ICONS
 // ═══════════════════════════════════════════════════════════
-const ICON_RENDER = 180; // high-res offscreen
-
+const ICON_RENDER = 180;
 const iconCache = ICONS.map(icon => {
   const oc = document.createElement('canvas');
   oc.width = oc.height = ICON_RENDER;
   const c2 = oc.getContext('2d');
-  const S = ICON_RENDER, r = S * 0.22;
+  const S = ICON_RENDER, r = S*0.22;
   c2.beginPath();
   c2.moveTo(r,0);c2.lineTo(S-r,0);c2.quadraticCurveTo(S,0,S,r);
   c2.lineTo(S,S-r);c2.quadraticCurveTo(S,S,S-r,S);
@@ -278,507 +241,383 @@ const iconCache = ICONS.map(icon => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// BUILD GRID OVERLAY (exact iPhone spacing)
+// LAYOUT (iPhone grid specs)
 // ═══════════════════════════════════════════════════════════
-function buildGrid(canvasW) {
-  const container = document.getElementById('grid-rows');
-  container.innerHTML = '';
-
-  const scale = Math.min(canvasW / 390, 1.2);
-  const iconPx  = Math.round(60 * scale);
-  const hGapPx  = Math.round(18 * scale);
-  const vGapPx  = Math.round(8 * scale);   // smaller visual gap in grid overlay
-  const labelH  = Math.round(18 * scale);
-
-  container.style.cssText = `display:flex;flex-direction:column;align-items:center;gap:${vGapPx}px;padding-top:${Math.round(16*scale)}px;`;
-
-  for (let row = 0; row < Math.ceil(ICONS.length/COLS); row++) {
-    const rowEl = document.createElement('div');
-    rowEl.style.cssText = `display:flex;gap:${hGapPx}px;`;
-    for (let col = 0; col < COLS; col++) {
-      const idx = row*COLS+col;
-      if (idx >= ICONS.length) break;
-      const item = document.createElement('div');
-      item.style.cssText = `display:flex;flex-direction:column;align-items:center;`;
-      const ic = document.createElement('canvas');
-      ic.width = ic.height = iconPx;
-      ic.style.cssText = `width:${iconPx}px;height:${iconPx}px;border-radius:${Math.round(iconPx*0.22)}px;display:block;box-shadow:0 2px 12px rgba(0,0,0,0.55);`;
-      ic.getContext('2d').drawImage(iconCache[idx],0,0,iconPx,iconPx);
-      const lbl = document.createElement('div');
-      lbl.style.cssText = `font-size:${Math.round(10*scale)}px;color:rgba(255,255,255,0.88);margin-top:3px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,0.9);max-width:${iconPx+hGapPx*0.6}px;overflow:hidden;white-space:nowrap;`;
-      lbl.textContent = ICONS[idx].label;
-      item.appendChild(ic);item.appendChild(lbl);
-      rowEl.appendChild(item);
-    }
-    container.appendChild(rowEl);
-  }
+const COLS = 4;
+function computeLayout(cw) {
+  const sc = Math.min(cw/390, 1.2);
+  return {
+    icon: Math.round(60*sc),
+    hgap: Math.round(18*sc),
+    vgap: Math.round(23*sc),
+    margin: Math.round(20*sc),
+    label: Math.round(18*sc),
+    sc
+  };
 }
-
-// ═══════════════════════════════════════════════════════════
-// CANVAS + PHYSICS
-// ═══════════════════════════════════════════════════════════
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-const wrap = document.getElementById('canvas-wrap');
-const modeBadge = document.getElementById('mode-badge');
-
-let W, H;
-let gravity = {x:0, y:0};
-let boxes = [];
-let gyroOn = false;
-let physicsActive = false;
-let dragging = null, lastPos = null;
-
-// mode: 'normal' | 'magnet' | 'homing'
-let mode = 'normal';
-let magnetPos = null;
-// Per-icon magnet multipliers (randomised each activation for chaos)
-let magnetMults = [];
-let touchHoldTimer = null;
-let homingTargets = [];
-
-// Ripples
-let ripples = [];
-
-function resize() {
-  const rect = wrap.getBoundingClientRect();
-  W = rect.width; H = rect.height;
-  canvas.width  = W * devicePixelRatio;
-  canvas.height = H * devicePixelRatio;
-  canvas.style.width  = W+'px';
-  canvas.style.height = H+'px';
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  buildGrid(W);
-}
-
-// Dynamic icon display size based on layout
-function getIconDisplaySize() {
-  const L = computeLayout(W, H);
-  return L.iconPt;
-}
-function getPhysR() {
-  return getIconDisplaySize() * 0.48;
-}
-
-function initBoxesAtGrid() {
-  const homes = computeHomePositions(W, H);
-  boxes = ICONS.map((_,i) => ({
-    id: i,
-    x: homes[i].x, y: homes[i].y,
-    vx:0, vy:0, angle:0, av:0,
-    // random magnet multiplier refreshed each magnet activation
-    magnetMult: 1
+function homePositions(cw, ch) {
+  const L = computeLayout(cw);
+  const totalW = COLS*L.icon + (COLS-1)*L.hgap;
+  const sx = (cw-totalW)/2 + L.icon/2;
+  const sy = Math.round(62*L.sc) + L.icon/2;
+  return ICONS.map((_,i)=>({
+    x: sx + (i%COLS)*(L.icon+L.hgap),
+    y: sy + Math.floor(i/COLS)*(L.icon+L.label+L.vgap)
   }));
 }
 
-// Physics constants
-const RESTITUTION  = 0.52;   // collision bounce
-const WALL_REST    = 0.32;   // wall bounce (less)
-const FLOOR_FRIC   = 0.65;   // sliding on walls (more friction)
-const AIR          = 0.980;  // air drag
-const G_SCALE      = 24;
-const ROT_DECAY    = 0.91;   // angular velocity decays slower → spins longer
-const MAX_ROT      = 0.18;   // allow real rotation now (was 0.025)
-const SURF_FRIC    = 0.35;   // surface friction between boxes (generates spin)
-// Magnet
-const MAGNET_BASE  = 26;
-// Homing
-const HOMING_K     = 0.10;
-const HOMING_DAMP  = 0.80;
+// ═══════════════════════════════════════════════════════════
+// GRID OVERLAY
+// ═══════════════════════════════════════════════════════════
+function buildGrid(cw) {
+  const L = computeLayout(cw);
+  const cont = document.getElementById('grid-rows');
+  cont.innerHTML='';
+  cont.style.cssText=`display:flex;flex-direction:column;align-items:center;gap:${L.vgap-4}px;padding-top:${Math.round(14*L.sc)}px;`;
+  for(let row=0;row<Math.ceil(ICONS.length/COLS);row++){
+    const rowEl=document.createElement('div');
+    rowEl.style.cssText=`display:flex;gap:${L.hgap}px;`;
+    for(let col=0;col<COLS;col++){
+      const idx=row*COLS+col;if(idx>=ICONS.length)break;
+      const item=document.createElement('div');
+      item.style.cssText=`display:flex;flex-direction:column;align-items:center;`;
+      const ic=document.createElement('canvas');
+      ic.width=ic.height=L.icon;
+      ic.style.cssText=`width:${L.icon}px;height:${L.icon}px;border-radius:${Math.round(L.icon*.22)}px;display:block;box-shadow:0 2px 12px rgba(0,0,0,.55);`;
+      ic.getContext('2d').drawImage(iconCache[idx],0,0,L.icon,L.icon);
+      const lbl=document.createElement('div');
+      lbl.style.cssText=`font-size:${Math.round(10*L.sc)}px;color:rgba(255,255,255,.88);margin-top:3px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.9);`;
+      lbl.textContent=ICONS[idx].label;
+      item.appendChild(ic);item.appendChild(lbl);rowEl.appendChild(item);
+    }
+    cont.appendChild(rowEl);
+  }
+}
 
-function step() {
+// ═══════════════════════════════════════════════════════════
+// MATTER.JS PHYSICS WORLD
+// ═══════════════════════════════════════════════════════════
+const { Engine, Render: MRender, Runner, Bodies, Body, World, Events,
+        Mouse, MouseConstraint, Composite, Vector } = Matter;
+
+let engine, runner, bodies = [], walls = [];
+let W, H, physicsActive=false, gyroOn=false, gyroListenerAdded=false;
+let mode='normal'; // 'normal' | 'homing'
+let homingTargets=[];
+
+const cMain = document.getElementById('c-main');
+const cBg   = document.getElementById('c-bg');
+const ctxMain = cMain.getContext('2d');
+const ctxBg   = cBg.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+function setCanvasSize() {
+  const rect = wrap.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+  [cMain, cBg].forEach(c => {
+    c.width  = W * devicePixelRatio;
+    c.height = H * devicePixelRatio;
+    c.style.width  = W+'px';
+    c.style.height = H+'px';
+  });
+  ctxMain.scale(devicePixelRatio, devicePixelRatio);
+  ctxBg.scale(devicePixelRatio, devicePixelRatio);
+}
+
+function buildWalls() {
+  walls.forEach(w => World.remove(engine.world, w));
+  const T = 60; // wall thickness
+  walls = [
+    Bodies.rectangle(W/2, H+T/2, W+T*2, T, {isStatic:true, label:'wall'}), // floor
+    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true, label:'wall'}), // ceiling
+    Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true, label:'wall'}), // left
+    Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true, label:'wall'}), // right
+  ];
+  walls.forEach(w => {
+    w.friction = 0.6;
+    w.restitution = 0.35;
+  });
+  World.add(engine.world, walls);
+}
+
+function createBody(x, y, size, idx) {
+  const b = Bodies.rectangle(x, y, size, size, {
+    restitution: 0.45,   // bounciness
+    friction: 0.55,       // surface friction → realistic spin on collision
+    frictionAir: 0.02,   // air resistance
+    density: 0.002,
+    label: 'icon_'+idx,
+  });
+  b.iconIdx = idx;
+  return b;
+}
+
+function initPhysics() {
+  engine = Engine.create({
+    gravity: { x: 0, y: 1, scale: 0.002 }
+  });
+
+  runner = Runner.create();
+  Runner.run(runner, engine);
+
+  buildWalls();
+
+  // Create icon bodies at grid positions (scattered slightly so they fall nicely)
+  const homes = homePositions(W, H);
+  const L = computeLayout(W);
+  bodies = ICONS.map((_, i) => {
+    const home = homes[i];
+    // Spawn above screen with slight random offset so they cascade down
+    const spawnY = -L.icon * 0.6 - Math.floor(i / COLS) * (L.icon + 8);
+    const spawnX = home.x + (Math.random()-0.5)*10;
+    const b = createBody(spawnX, spawnY, L.icon, i);
+    return b;
+  });
+  World.add(engine.world, bodies);
+
+  // Touch/mouse drag
+  const mouse = Mouse.create(cMain);
+  mouse.pixelRatio = devicePixelRatio;
+  const mc = MouseConstraint.create(engine, {
+    mouse,
+    constraint: { stiffness: 0.25, render: { visible: false } }
+  });
+  World.add(engine.world, mc);
+}
+
+// Render loop (manual canvas draw — no built-in Matter renderer)
+function renderLoop() {
+  requestAnimationFrame(renderLoop);
   if (!physicsActive) return;
-  const PHYS_R = getPhysR();
-  const BOX    = getIconDisplaySize();
 
+  const L = computeLayout(W);
+  const size = L.icon;
+
+  ctxMain.clearRect(0, 0, W, H);
+
+  for (const b of bodies) {
+    const pos = b.position;
+    const angle = b.angle;
+    const idx = b.iconIdx;
+
+    ctxMain.save();
+    ctxMain.translate(pos.x, pos.y);
+    ctxMain.rotate(angle);
+
+    // Shadow
+    ctxMain.shadowColor = 'rgba(0,0,0,0.55)';
+    ctxMain.shadowBlur  = 16;
+    ctxMain.shadowOffsetY = 4;
+    ctxMain.drawImage(iconCache[idx], -size/2, -size/2, size, size);
+    ctxMain.shadowBlur = 0; ctxMain.shadowOffsetY = 0;
+
+    // Label below icon
+    ctxMain.rotate(-angle); // keep label upright
+    ctxMain.fillStyle = 'rgba(255,255,255,0.88)';
+    ctxMain.font = `${Math.round(size*0.15)}px -apple-system,sans-serif`;
+    ctxMain.textAlign = 'center';
+    ctxMain.fillText(ICONS[idx].label, 0, size/2 + size*0.22);
+
+    ctxMain.restore();
+  }
+
+  // Homing ghost dots
   if (mode === 'homing') {
-    let allDone = true;
-    for (const b of boxes) {
-      const home = homingTargets[b.id];
-      const dx = home.x - b.x, dy = home.y - b.y;
-      b.vx += dx * HOMING_K;
-      b.vy += dy * HOMING_K;
-      b.vx *= HOMING_DAMP;
-      b.vy *= HOMING_DAMP;
-      b.av *= 0.65;
-      b.angle *= 0.82;
-      b.x += b.vx; b.y += b.vy;
-      const dist = Math.sqrt(dx*dx+dy*dy);
-      if (dist > 2 || Math.abs(b.vx)+Math.abs(b.vy) > 0.4) allDone = false;
-    }
-    if (allDone) {
-      for (const b of boxes) {
-        const home = homingTargets[b.id];
-        b.x=home.x; b.y=home.y; b.vx=0; b.vy=0; b.angle=0; b.av=0;
-      }
-      endHoming();
-    }
-    return;
-  }
-
-  for (const b of boxes) {
-    if (dragging && dragging.id===b.id) continue;
-
-    if (mode==='magnet' && magnetPos) {
-      const dx = magnetPos.x-b.x, dy = magnetPos.y-b.y;
-      const dist = Math.sqrt(dx*dx+dy*dy)+1;
-      // Force: constant strong pull, scaled by per-icon random multiplier
-      // No distance falloff so even far icons accelerate chaotically
-      const f = MAGNET_BASE * b.magnetMult;
-      b.vx += (dx/dist)*f*0.016;
-      b.vy += (dy/dist)*f*0.016;
-    } else {
-      b.vx += gravity.x*G_SCALE*0.016;
-      b.vy += gravity.y*G_SCALE*0.016;
-    }
-
-    b.vx *= AIR; b.vy *= AIR;
-    b.av *= ROT_DECAY;
-    // No hard clamp on MAX_ROT during normal play — let them spin naturally
-    // Only damp when nearly stopped (like a block settling on a surface)
-    b.x += b.vx; b.y += b.vy;
-    b.angle += b.av;
-
-    const h = PHYS_R;
-    // Walls: normal bounce + friction generates angular velocity (realistic tumble)
-    if (b.x-h<0)  {b.x=h;    b.vx= Math.abs(b.vx)*WALL_REST; const fri=b.vy*FLOOR_FRIC; b.av+=(b.vy-fri)*SURF_FRIC*0.05; b.vy*=FLOOR_FRIC;}
-    if (b.x+h>W)  {b.x=W-h;  b.vx=-Math.abs(b.vx)*WALL_REST; const fri=b.vy*FLOOR_FRIC; b.av-=(b.vy-fri)*SURF_FRIC*0.05; b.vy*=FLOOR_FRIC;}
-    if (b.y-h<0)  {b.y=h;    b.vy= Math.abs(b.vy)*WALL_REST;  const fri=b.vx*FLOOR_FRIC; b.av-=(b.vx-fri)*SURF_FRIC*0.05; b.vx*=FLOOR_FRIC;}
-    if (b.y+h>H)  {b.y=H-h;  b.vy=-Math.abs(b.vy)*WALL_REST;  const fri=b.vx*FLOOR_FRIC; b.av+=(b.vx-fri)*SURF_FRIC*0.05; b.vx*=FLOOR_FRIC;}
-
-    // Settle: when slow, damp spin toward zero like friction on a surface
-    const speed = Math.sqrt(b.vx*b.vx+b.vy*b.vy);
-    if (speed < 0.8) { b.av *= 0.88; }
-  }
-
-  // AABB collisions with surface friction → realistic spin (3 passes)
-  for (let iter=0;iter<3;iter++) {
-    for (let i=0;i<boxes.length;i++) {
-      for (let j=i+1;j<boxes.length;j++) {
-        const a=boxes[i],b=boxes[j];
-        if (dragging&&(dragging.id===a.id||dragging.id===b.id)) continue;
-        const dx=b.x-a.x, dy=b.y-a.y;
-        const ox=(PHYS_R+PHYS_R)-Math.abs(dx);
-        const oy=(PHYS_R+PHYS_R)-Math.abs(dy);
-        if (ox<=0||oy<=0) continue;
-
-        if (ox<oy) {
-          // Horizontal collision — normal is X, tangent is Y
-          const sep=ox/2+0.5, sign=dx>0?1:-1;
-          a.x-=sign*sep; b.x+=sign*sep;
-          const rvn=b.vx-a.vx;  // relative normal velocity
-          if (rvn*sign<0){
-            const imp=rvn*0.5*(1+RESTITUTION);
-            a.vx+=imp; b.vx-=imp;
-          }
-          // Tangential friction → spin
-          const rvt=b.vy-a.vy;  // relative tangential velocity
-          const fricImp=rvt*SURF_FRIC*0.5;
-          a.vy+=fricImp; b.vy-=fricImp;
-          // Torque: friction force × lever arm (half box size)
-          const lever=PHYS_R*0.5;
-          a.av -= fricImp*lever*0.012 * sign;
-          b.av += fricImp*lever*0.012 * sign;
-        } else {
-          // Vertical collision — normal is Y, tangent is X
-          const sep=oy/2+0.5, sign=dy>0?1:-1;
-          a.y-=sign*sep; b.y+=sign*sep;
-          const rvn=b.vy-a.vy;
-          if (rvn*sign<0){
-            const imp=rvn*0.5*(1+RESTITUTION);
-            a.vy+=imp; b.vy-=imp;
-          }
-          // Tangential friction → spin
-          const rvt=b.vx-a.vx;
-          const fricImp=rvt*SURF_FRIC*0.5;
-          a.vx+=fricImp; b.vx-=fricImp;
-          const lever=PHYS_R*0.5;
-          a.av += fricImp*lever*0.012 * sign;
-          b.av -= fricImp*lever*0.012 * sign;
-        }
-        // Clamp angular velocity so it feels physical (not infinite spin)
-        a.av=Math.max(-MAX_ROT,Math.min(MAX_ROT,a.av));
-        b.av=Math.max(-MAX_ROT,Math.min(MAX_ROT,b.av));
-      }
-    }
-  }
-}
-
-function render() {
-  ctx.clearRect(0,0,W,H);
-  const BOX = getIconDisplaySize();
-
-  // Ripples
-  ripples = ripples.filter(r=>r.alpha>0.015);
-  ripples.forEach(r=>{r.r+=5;r.alpha*=0.86;});
-  for (const r of ripples) {
-    ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(80,200,255,${r.alpha})`;
-    ctx.lineWidth=2;ctx.stroke();
-  }
-
-  // Magnet indicator
-  if (mode==='magnet'&&magnetPos) {
-    const mx=magnetPos.x, my=magnetPos.y;
-    // Outer glow ring
-    const grad = ctx.createRadialGradient(mx,my,4,mx,my,60);
-    grad.addColorStop(0,'rgba(50,180,255,0.25)');
-    grad.addColorStop(1,'rgba(50,180,255,0)');
-    ctx.fillStyle=grad;
-    ctx.beginPath();ctx.arc(mx,my,60,0,Math.PI*2);ctx.fill();
-    // Crosshair
-    ctx.setLineDash([4,4]);
-    ctx.strokeStyle='rgba(80,210,255,0.6)';ctx.lineWidth=1.5;
-    ln(ctx,mx-36,my,mx+36,my,1.5,'rgba(80,210,255,0.6)');
-    ln(ctx,mx,my-36,mx,my+36,1.5,'rgba(80,210,255,0.6)');
-    ctx.setLineDash([]);
-    ctx.beginPath();ctx.arc(mx,my,16,0,Math.PI*2);
-    ctx.strokeStyle='rgba(80,220,255,0.75)';ctx.lineWidth=2;ctx.stroke();
-    circ(ctx,mx,my,5,'rgba(80,220,255,0.95)');
-  }
-
-  // Homing ghost targets
-  if (mode==='homing') {
-    ctx.fillStyle='rgba(255,255,255,0.04)';
+    ctxMain.fillStyle = 'rgba(255,255,255,0.06)';
     for (const t of homingTargets) {
-      ctx.beginPath();ctx.arc(t.x,t.y,getPhysR(),0,Math.PI*2);ctx.fill();
+      ctxMain.beginPath();
+      ctxMain.arc(t.x, t.y, L.icon*0.48, 0, Math.PI*2);
+      ctxMain.fill();
     }
-  }
-
-  // Draw icons
-  for (const b of boxes) {
-    ctx.save();
-    ctx.translate(b.x,b.y);
-    ctx.rotate(b.angle);
-    ctx.shadowColor='rgba(0,0,0,0.6)';
-    ctx.shadowBlur=dragging&&dragging.id===b.id?32:18;
-    ctx.shadowOffsetY=5;
-    ctx.drawImage(iconCache[b.id],-BOX/2,-BOX/2,BOX,BOX);
-    ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    ctx.fillStyle='rgba(255,255,255,0.88)';
-    ctx.font=`${Math.round(BOX*0.155)}px -apple-system,sans-serif`;
-    ctx.textAlign='center';
-    ctx.fillText(ICONS[b.id].label,0,BOX/2+BOX*0.24);
-    ctx.restore();
   }
 }
 
-function loop(){step();render();requestAnimationFrame(loop);}
+// ── Gyro / gravity ────────────────────────────────────────
+function setGravity(gx, gy) {
+  if (!engine || mode==='homing') return;
+  engine.gravity.x = gx;
+  engine.gravity.y = gy;
+}
+
+function enableGyroSilent() {
+  if (!gyroListenerAdded) {
+    gyroListenerAdded = true;
+    window.addEventListener('deviceorientation', e => {
+      if (!gyroOn || mode==='homing') return;
+      const gx = Math.sin((e.gamma||0)*Math.PI/180);
+      const gy = Math.sin((e.beta||0) *Math.PI/180);
+      setGravity(gx, gy);
+    });
+  }
+  gyroOn = true;
+  document.getElementById('gyroBtn').classList.add('on');
+  document.getElementById('gyroBtn').textContent = '🌀';
+  if (!physicsActive) activatePhysics();
+  setBadge('🌀 陀螺仪已开启','rgba(100,220,100,0.85)');
+}
+
+function disableGyro() {
+  gyroOn = false;
+  document.getElementById('gyroBtn').classList.remove('on');
+  document.getElementById('gyroBtn').textContent = '📱';
+  if (engine) { engine.gravity.x=0; engine.gravity.y=1; }
+  setBadge('重力模式','rgba(255,255,255,0.5)');
+}
 
 // ── Activate physics ──────────────────────────────────────
 function activatePhysics() {
   physicsActive = true;
   const overlay = document.getElementById('grid-overlay');
   overlay.classList.add('hidden');
-  setTimeout(()=>{overlay.style.display='none';},600);
-  canvas.style.display='block';
-  modeBadge.style.display='block';
-  document.getElementById('homeBtn').style.display='flex';
-  document.getElementById('footer').textContent='长按磁吸 · 🏠归位 · 摇手机归位';
+  setTimeout(()=>overlay.style.display='none', 600);
+  cMain.style.display = 'block';
+  document.getElementById('mode-badge').style.display = 'block';
+  document.getElementById('homeBtn').style.display = 'flex';
+  document.getElementById('footer').textContent = '倾斜掉落 · 摇一下甩飞 · 摇两下归位';
   setBadge('重力模式','rgba(255,255,255,0.5)');
-  initBoxesAtGrid();
-  loop();
-  setTimeout(()=>{gravity={x:0,y:1};},80);
+  setCanvasSize();
+  initPhysics();
+  renderLoop();
 }
 
-function setBadge(text,col){modeBadge.textContent=text;modeBadge.style.color=col||'rgba(255,255,255,0.5)';}
+function setBadge(t,c){const b=document.getElementById('mode-badge');b.textContent=t;b.style.color=c||'rgba(255,255,255,0.5)';}
 
 // ── Homing ────────────────────────────────────────────────
 function triggerHoming() {
   if (mode==='homing') return;
-  mode='homing';
-  magnetPos=null;
-  homingTargets=computeHomePositions(W,H);
+  mode = 'homing';
+  homingTargets = homePositions(W, H);
   setBadge('🏠 归位中…','rgba(255,220,80,0.9)');
-}
-function endHoming() {
-  mode='normal';
-  gravity={x:0,y:1};
-  setBadge('重力模式','rgba(255,255,255,0.5)');
-}
 
-// ── Magnet activation ─────────────────────────────────────
-function startMagnet(pos) {
-  mode='magnet';
-  magnetPos=pos;
-  // Give each icon a random multiplier 0.4–2.8 for chaotic nuclear effect
-  for (const b of boxes) {
-    b.magnetMult = 0.4 + Math.random()*2.4;
-  }
-  setBadge('🧲 核聚变磁吸','rgba(80,220,255,0.9)');
-  ripples.push({x:pos.x,y:pos.y,r:8,alpha:0.9});
-  ripples.push({x:pos.x,y:pos.y,r:20,alpha:0.55});
-}
-function endMagnet() {
-  mode='normal';
-  magnetPos=null;
-  setBadge('重力模式','rgba(255,255,255,0.5)');
-}
+  // Turn off gravity so spring can pull them back cleanly
+  engine.gravity.x = 0; engine.gravity.y = 0;
 
-// ── Touch ─────────────────────────────────────────────────
-function getPos(e){
-  const rect=canvas.getBoundingClientRect();
-  const src=e.touches?e.touches[0]:e;
-  return{x:src.clientX-rect.left,y:src.clientY-rect.top};
-}
-function findBox(px,py){
-  const PHYS_R=getPhysR();
-  for(let i=boxes.length-1;i>=0;i--){
-    const b=boxes[i];
-    if(Math.abs(px-b.x)<PHYS_R&&Math.abs(py-b.y)<PHYS_R) return b;
-  }
-  return null;
-}
-
-canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  if(mode==='homing') return;
-  const p=getPos(e);
-  const hit=findBox(p.x,p.y);
-  if(hit){dragging=hit;lastPos=p;return;}
-  // Long-press = magnet (short threshold for instant feel)
-  touchHoldTimer=setTimeout(()=>startMagnet(p),80);
-},{passive:false});
-
-canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(mode==='homing') return;
-  const p=getPos(e);
-  if(dragging){
-    dragging.vx=(p.x-lastPos.x)*0.65;
-    dragging.vy=(p.y-lastPos.y)*0.65;
-    dragging.x=p.x;dragging.y=p.y;lastPos=p;return;
-  }
-  if(mode==='magnet'){
-    magnetPos=p;
-    if(Math.random()<0.3) ripples.push({x:p.x,y:p.y,r:4,alpha:0.4});
-  }
-},{passive:false});
-
-canvas.addEventListener('touchend',e=>{
-  e.preventDefault();
-  clearTimeout(touchHoldTimer);
-  if(dragging){dragging.vx*=1.5;dragging.vy*=1.5;dragging.av=0;dragging=null;return;}
-  if(mode==='magnet') endMagnet();
-},{passive:false});
-
-// Mouse (desktop)
-canvas.addEventListener('mousedown',e=>{
-  if(mode==='homing') return;
-  const p=getPos(e);
-  const hit=findBox(p.x,p.y);
-  if(hit){dragging=hit;return;}
-  startMagnet(p);
-});
-canvas.addEventListener('mousemove',e=>{
-  if(mode==='homing') return;
-  if(dragging){
-    const p=getPos(e);
-    dragging.vx=(p.x-dragging.x)*0.65;dragging.vy=(p.y-dragging.y)*0.65;
-    dragging.x=p.x;dragging.y=p.y;return;
-  }
-  if(mode==='magnet'){magnetPos=getPos(e);return;}
-  if(!gyroOn){
-    const rect=canvas.getBoundingClientRect();
-    gravity.x=((e.clientX-rect.left)/W*2-1)*1.6;
-    gravity.y=((e.clientY-rect.top)/H*2-1)*1.6;
-  }
-});
-canvas.addEventListener('mouseup',e=>{
-  if(dragging){dragging.vx*=1.5;dragging.vy*=1.5;dragging.av=0;dragging=null;return;}
-  if(mode==='magnet') endMagnet();
-});
-
-document.getElementById('homeBtn').addEventListener('click',()=>{
-  if(physicsActive) triggerHoming();
-});
-
-// ═══════════════════════════════════════════════════════════
-// SHAKE DETECTION
-// 摇一下 → 开启陀螺仪（无需询问）
-// 摇两下 → 归位 + 关闭陀螺仪
-// ═══════════════════════════════════════════════════════════
-let lastAccel={x:0,y:0,z:0},shakeCount=0,lastShakeTime=0;
-let gyroListenerAdded=false;
-
-function enableGyroSilent(){
-  if(!gyroListenerAdded){
-    gyroListenerAdded=true;
-    window.addEventListener('deviceorientation',e=>{
-      if(!gyroOn||mode==='homing'||mode==='magnet') return;
-      gravity.x= Math.sin((e.gamma||0)*Math.PI/180)*2.4;
-      gravity.y= Math.sin((e.beta||0) *Math.PI/180)*2.4;
+  // Spring each body toward its home using a tween-like force each tick
+  const unsub = Events.on(engine, 'beforeUpdate', () => {
+    let allSettled = true;
+    const L = computeLayout(W);
+    bodies.forEach((b, i) => {
+      const home = homingTargets[i];
+      const dx = home.x - b.position.x;
+      const dy = home.y - b.position.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      // Spring force toward home
+      const k = 0.008;
+      Body.applyForce(b, b.position, { x: dx*k, y: dy*k });
+      // Damping
+      Body.setVelocity(b, {
+        x: b.velocity.x * 0.85,
+        y: b.velocity.y * 0.85
+      });
+      // Align angle toward 0
+      Body.setAngularVelocity(b, b.angularVelocity * 0.75);
+      Body.setAngle(b, b.angle * 0.88);
+      if (dist > 3 || Math.abs(b.velocity.x)+Math.abs(b.velocity.y) > 0.3) allSettled=false;
     });
-  }
-  gyroOn=true;
-  gyroBtn.classList.add('on');gyroBtn.textContent='🌀';
-  if(!physicsActive) activatePhysics();
-  setBadge('🌀 陀螺仪已开启','rgba(100,220,100,0.85)');
-}
 
-function disableGyro(){
-  gyroOn=false;
-  gyroBtn.classList.remove('on');gyroBtn.textContent='📱';
-  gravity={x:0,y:1};
-  setBadge('重力模式','rgba(255,255,255,0.5)');
-}
-
-window.addEventListener('devicemotion',e=>{
-  const acc=e.accelerationIncludingGravity;if(!acc)return;
-  const dx=acc.x-lastAccel.x,dy=acc.y-lastAccel.y,dz=acc.z-lastAccel.z;
-  const shake=Math.sqrt(dx*dx+dy*dy+dz*dz);
-  lastAccel={x:acc.x,y:acc.y,z:acc.z};
-  const now=Date.now();
-  if(shake>18&&now-lastShakeTime>280){
-    lastShakeTime=now;shakeCount++;
-    if(shakeCount>=2&&physicsActive&&mode!=='homing'){
-      shakeCount=0;
-      triggerHoming();
-      setTimeout(()=>disableGyro(),200);
-    } else if(shakeCount===1&&physicsActive&&!gyroOn){
-      enableGyroSilent();
+    if (allSettled) {
+      Events.off(engine, 'beforeUpdate', unsub);
+      // Snap exactly to home
+      bodies.forEach((b,i)=>{
+        Body.setPosition(b, homingTargets[i]);
+        Body.setVelocity(b,{x:0,y:0});
+        Body.setAngle(b,0);
+        Body.setAngularVelocity(b,0);
+      });
+      mode = 'normal';
+      engine.gravity.x=0; engine.gravity.y=1;
+      setBadge('重力模式','rgba(255,255,255,0.5)');
     }
-    setTimeout(()=>{shakeCount=Math.max(0,shakeCount-1);},700);
+  });
+}
+
+// ── Shake ─────────────────────────────────────────────────
+function shakeAll() {
+  // Give every icon a random impulse — fly in all directions
+  bodies.forEach(b => {
+    Body.applyForce(b, b.position, {
+      x: (Math.random()-0.5)*0.08,
+      y: (Math.random()-0.5)*0.08 - 0.04
+    });
+    Body.setAngularVelocity(b, (Math.random()-0.5)*0.6);
+  });
+}
+
+// ── Shake detection ───────────────────────────────────────
+let lastAccel={x:0,y:0,z:0}, shakeCount=0, lastShakeTime=0;
+
+window.addEventListener('devicemotion', e => {
+  const acc = e.accelerationIncludingGravity; if (!acc) return;
+  const dx=acc.x-lastAccel.x, dy=acc.y-lastAccel.y, dz=acc.z-lastAccel.z;
+  const mag = Math.sqrt(dx*dx+dy*dy+dz*dz);
+  lastAccel = {x:acc.x,y:acc.y,z:acc.z};
+  const now = Date.now();
+  if (mag > 18 && now-lastShakeTime > 280) {
+    lastShakeTime = now;
+    shakeCount++;
+    if (shakeCount >= 2 && physicsActive && mode!=='homing') {
+      shakeCount = 0;
+      triggerHoming();
+      setTimeout(()=>disableGyro(), 300);
+    } else if (shakeCount === 1 && physicsActive) {
+      shakeAll();
+      if (!gyroOn) enableGyroSilent();
+    }
+    setTimeout(()=>{ shakeCount=Math.max(0,shakeCount-1); }, 700);
   }
 });
 
-// ═══════════════════════════════════════════════════════════
-// GYROSCOPE  (button + prompt)
-// ═══════════════════════════════════════════════════════════
-const gyroBtn=document.getElementById('gyroBtn');
-const gyroPrompt=document.getElementById('gyro-prompt');
+// Desktop: mouse over canvas changes gravity direction
+cMain.addEventListener('mousemove', e => {
+  if (!physicsActive || !engine || mode==='homing') return;
+  if (e.buttons) return; // dragging
+  const rect = cMain.getBoundingClientRect();
+  const nx = ((e.clientX-rect.left)/W*2-1)*1.4;
+  const ny = ((e.clientY-rect.top) /H*2-1)*1.4;
+  setGravity(nx, ny);
+});
 
-async function requestAndEnableGyro(){
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    try{const p=await DeviceOrientationEvent.requestPermission();if(p==='granted')enableGyroSilent();}
-    catch(e){enableGyroSilent();}
-  } else {
-    enableGyroSilent();
-  }
-}
+// Home button
+document.getElementById('homeBtn').addEventListener('click', ()=>{
+  if (physicsActive) triggerHoming();
+});
 
-gyroBtn.addEventListener('click',async()=>{
-  if(gyroOn){disableGyro();return;}
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+// ── Gyro button + prompt ──────────────────────────────────
+const gyroBtn = document.getElementById('gyroBtn');
+const gyroPrompt = document.getElementById('gyro-prompt');
+
+gyroBtn.addEventListener('click', async () => {
+  if (gyroOn) { disableGyro(); return; }
+  if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function') {
     gyroPrompt.classList.add('show');
   } else {
     enableGyroSilent();
-    if(!physicsActive) activatePhysics();
+    if (!physicsActive) activatePhysics();
   }
 });
-document.getElementById('gyroAllowBtn').addEventListener('click',async()=>{
+document.getElementById('gyroAllowBtn').addEventListener('click', async () => {
   gyroPrompt.classList.remove('show');
-  await requestAndEnableGyro();
+  try {
+    const p = await DeviceOrientationEvent.requestPermission();
+    if (p==='granted') enableGyroSilent();
+  } catch(e) { enableGyroSilent(); }
 });
-document.getElementById('gyroSkipBtn').addEventListener('click',()=>gyroPrompt.classList.remove('show'));
+document.getElementById('gyroSkipBtn').addEventListener('click', ()=>gyroPrompt.classList.remove('show'));
 
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
-window.addEventListener('resize',()=>{resize();if(physicsActive)initBoxesAtGrid();});
-resize();
+// ── Resize ────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  setCanvasSize();
+  buildGrid(W);
+  if (physicsActive && engine) buildWalls();
+});
 
-// Splash
+// ── Init ──────────────────────────────────────────────────
+const wrapRect = wrap.getBoundingClientRect();
+W = wrapRect.width; H = wrapRect.height;
+setCanvasSize();
+buildGrid(W);
+
+// Splash icons
 setTimeout(()=>{
   const g=document.getElementById('spGrid');
   for(let i=0;i<9;i++){
