@@ -23,125 +23,94 @@ html,body{
 }
 #app{position:fixed;inset:0;display:flex;flex-direction:column;}
 
-/* Splash */
-#splash{
-  position:fixed;inset:0;background:#1c1c1e;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  z-index:100;transition:opacity 0.5s ease,transform 0.5s ease;
-}
-#splash.hide{opacity:0;transform:scale(1.06);pointer-events:none;}
-.sp-grid{display:grid;grid-template-columns:repeat(3,52px);gap:8px;animation:popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;}
-@keyframes popIn{from{transform:scale(0.4)rotate(-10deg);opacity:0}to{transform:scale(1);opacity:1}}
-.sp-ic{width:52px;height:52px;border-radius:13px;}
-.sp-title{font-size:30px;font-weight:700;color:#fff;letter-spacing:-.5px;animation:fadeUp .5s .3s both;}
-.sp-sub{font-size:13px;color:rgba(255,255,255,.4);animation:fadeUp .5s .45s both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* Header */
 #header{
   padding:calc(var(--safe-top)+8px) 16px 6px;
   display:flex;align-items:center;justify-content:space-between;z-index:10;flex-shrink:0;
 }
 #header h1{font-size:17px;font-weight:700;color:rgba(255,255,255,.88);letter-spacing:-.3px;}
-.hbtns{display:flex;gap:7px;}
+.hbtns{display:flex;gap:8px;}
 .hbtn{
-  width:34px;height:34px;border-radius:50%;border:none;
-  background:rgba(255,255,255,.1);color:rgba(255,255,255,.65);
-  font-size:14px;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);
+  font-size:15px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:background .15s,transform .1s;
 }
-.hbtn:active{background:rgba(255,255,255,.22);transform:scale(.9);}
-.hbtn.on{background:rgba(100,200,100,.25);color:#66dd66;}
+.hbtn:active{background:rgba(255,255,255,.25);transform:scale(.9);}
+.hbtn.on{background:rgba(80,200,120,.3);color:#66dd88;}
 
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
-canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0;}
-#c-bg{z-index:0;}   /* background / effects layer */
-#c-main{z-index:2;} /* icons layer — above grid overlay */
 
-#footer{padding:4px 16px calc(var(--safe-bottom)+3px);text-align:center;font-size:10px;color:rgba(255,255,255,.18);flex-shrink:0;}
-
-/* Badge */
-#mode-badge{
-  position:absolute;top:8px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.5);border-radius:20px;padding:3px 12px;
-  font-size:11px;color:rgba(255,255,255,.55);pointer-events:none;
-  transition:color .3s;white-space:nowrap;display:none;z-index:5;
+/* THE ONLY canvas — always visible */
+#c{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  display:block;
 }
 
-/* Grid overlay */
-#grid-overlay{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  transition:opacity .5s ease;overflow:hidden;z-index:1;
+#footer{
+  padding:4px 16px calc(var(--safe-bottom)+4px);
+  text-align:center;font-size:10px;color:rgba(255,255,255,.2);flex-shrink:0;
 }
-#grid-overlay.hidden{opacity:0;pointer-events:none;}
-.hint-pulse{
-  margin-top:8px;font-size:11px;color:rgba(255,255,255,.32);white-space:nowrap;
-  animation:pulse 2.2s infinite;
-}
-@keyframes pulse{0%,100%{opacity:.32}50%{opacity:.7}}
 
 /* Gyro prompt */
 #gyro-prompt{
-  position:fixed;inset:0;background:rgba(0,0,0,.72);
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
   display:flex;align-items:flex-end;justify-content:center;
-  padding-bottom:calc(var(--safe-bottom)+20px);
+  padding-bottom:calc(var(--safe-bottom)+24px);
   z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;
 }
 #gyro-prompt.show{opacity:1;pointer-events:all;}
-.gp-card{background:#2c2c2e;border-radius:20px;padding:28px 24px 20px;width:calc(100% - 32px);max-width:400px;text-align:center;}
-.gp-icon{font-size:48px;margin-bottom:12px;}
-.gp-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
-.gp-desc{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:22px;line-height:1.6;}
-.gp-btn{width:100%;padding:14px;border-radius:14px;border:none;background:#30d158;color:#fff;font-size:17px;font-weight:600;cursor:pointer;margin-bottom:10px;}
-.gp-skip{background:none;border:none;color:rgba(255,255,255,.35);font-size:14px;cursor:pointer;padding:8px;}
+.gp-card{background:#2c2c2e;border-radius:22px;padding:30px 24px 22px;width:calc(100% - 32px);max-width:380px;text-align:center;}
+.gp-icon{font-size:50px;margin-bottom:14px;}
+.gp-title{font-size:21px;font-weight:700;color:#fff;margin-bottom:8px;}
+.gp-desc{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px;line-height:1.6;}
+.gp-btn{width:100%;padding:15px;border-radius:14px;border:none;background:#30d158;color:#fff;font-size:17px;font-weight:600;cursor:pointer;margin-bottom:10px;}
+.gp-skip{background:none;border:none;color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;padding:8px;}
 
 /* Install bar */
 #install-bar{
-  position:fixed;bottom:calc(var(--safe-bottom)+56px);left:50%;transform:translateX(-50%);
-  background:rgba(44,44,46,.96);border:1px solid rgba(255,255,255,.1);
+  position:fixed;bottom:calc(var(--safe-bottom)+58px);left:50%;transform:translateX(-50%);
+  background:rgba(40,40,42,.96);border:1px solid rgba(255,255,255,.1);
   border-radius:14px;padding:9px 14px;
   display:flex;align-items:center;gap:10px;z-index:20;
   max-width:calc(100% - 32px);font-size:11px;color:rgba(255,255,255,.7);
-  white-space:nowrap;animation:slideUp .4s 2.5s both;
+  white-space:nowrap;animation:slideUp .4s 3s both;
 }
 @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.ib-close{margin-left:4px;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:15px;}
+.ib-close{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:15px;margin-left:4px;}
+
+/* Badge */
+#badge{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.5);border-radius:20px;padding:3px 14px;
+  font-size:11px;color:rgba(255,255,255,.5);pointer-events:none;
+  white-space:nowrap;z-index:5;transition:opacity .3s;
+}
 </style>
 </head>
 <body>
-
-<div id="splash">
-  <div class="sp-grid" id="spGrid"></div>
-  <div class="sp-title">GraviIcons</div>
-  <div class="sp-sub">摇手机 · 倾斜 · 真实物理</div>
-</div>
 
 <div id="app">
   <div id="header">
     <h1>GraviIcons</h1>
     <div class="hbtns">
       <button class="hbtn" id="gyroBtn">📱</button>
-      <button class="hbtn" id="homeBtn" style="display:none" title="归位">🏠</button>
+      <button class="hbtn" id="homeBtn">🏠</button>
     </div>
   </div>
   <div id="canvas-wrap">
-    <canvas id="c-bg"></canvas>
-    <canvas id="c-main"></canvas>
-    <div id="grid-overlay">
-      <div id="grid-rows"></div>
-      <div class="hint-pulse">开启陀螺仪后图标随重力掉落堆叠</div>
-    </div>
-    <div id="mode-badge"></div>
+    <canvas id="c"></canvas>
+    <div id="badge">静止模式 · 点击图标弹飞</div>
   </div>
-  <div id="footer">倾斜手机 · 摇动甩飞 · 再摇归位</div>
+  <div id="footer">开启陀螺仪 → 倾斜掉落 · 摇两下归位</div>
 </div>
 
 <div id="gyro-prompt">
   <div class="gp-card">
     <div class="gp-icon">📱</div>
     <div class="gp-title">开启陀螺仪</div>
-    <div class="gp-desc">倾斜手机，图标像积木一样掉落堆叠<br>摇一下甩飞 · 摇两下归位</div>
-    <button class="gp-btn" id="gyroAllowBtn">✦ 开启并体验</button>
+    <div class="gp-desc">倾斜手机让图标像积木掉落堆叠<br>摇一下甩飞 · 摇两下归位</div>
+    <button class="gp-btn" id="gyroAllowBtn">✦ 开启陀螺仪</button>
     <button class="gp-skip" id="gyroSkipBtn">稍后再说</button>
   </div>
 </div>
@@ -151,20 +120,18 @@ canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0;}
   <button class="ib-close" id="installClose">✕</button>
 </div>
 
-<!-- Matter.js from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-
 <script>
-// ═══════════════════════════════════════════════════════════
-// ICON DEFINITIONS + DRAWING
-// ═══════════════════════════════════════════════════════════
-const ICONS = [
+// ─────────────────────────────────────────────
+// ICON DRAWING
+// ─────────────────────────────────────────────
+const ICONS=[
   {label:'商店',  grad:['#1a8cff','#0055cc'], draw:drawStore},
   {label:'音乐',  grad:['#cc44ff','#7700cc'],  draw:drawMusic},
   {label:'相机',  grad:['#888','#444'],         draw:drawCamera},
   {label:'时钟',  grad:['#333','#111'],          draw:drawClock},
   {label:'邮件',  grad:['#55aaff','#1a66cc'],  draw:drawMail},
-  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMessage},
+  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMsg},
   {label:'电话',  grad:['#44cc44','#228822'],  draw:drawPhone},
   {label:'导航',  grad:['#3399ff','#1155bb'],  draw:drawCompass},
   {label:'天气',  grad:['#55aaee','#2277bb'],  draw:drawWeather},
@@ -175,8 +142,8 @@ const ICONS = [
   {label:'备忘录',grad:['#ffdd44','#ffaa00'],  draw:drawNotes},
   {label:'播客',  grad:['#aa44ff','#6600cc'],  draw:drawPodcast},
   {label:'通讯录',grad:['#cc9944','#885500'],  draw:drawContacts},
-  {label:'照片',  grad:['#ffffff','#dddddd'],  draw:drawPhotos},
-  {label:'计算器',grad:['#2a2a2a','#111'],      draw:drawCalculator},
+  {label:'照片',  grad:['#fff','#ddd'],         draw:drawPhotos},
+  {label:'计算器',grad:['#2a2a2a','#111'],      draw:drawCalc},
   {label:'健康',  grad:['#ff3366','#cc0044'],  draw:drawHealth},
   {label:'钱包',  grad:['#1a1a1a','#000'],      draw:drawWallet},
   {label:'游戏',  grad:['#ff6633','#cc3300'],  draw:drawGame},
@@ -185,459 +152,373 @@ const ICONS = [
   {label:'手电',  grad:['#222','#000'],          draw:drawFlash},
 ];
 
-function rc(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fill();}
-function circ(c,cx,cy,r,col){c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle=col;c.fill();}
-function ln(c,x1,y1,x2,y2,w,col){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=col;c.lineWidth=w;c.stroke();}
+function _rc(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fill();}
+function _ci(c,cx,cy,r,col){c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle=col;c.fill();}
+function _ln(c,x1,y1,x2,y2,w,col){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=col;c.lineWidth=w;c.stroke();}
 
-function drawStore(c,s){c.strokeStyle='#fff';c.lineWidth=s*.07;c.lineCap='round';c.beginPath();c.arc(s*.5,s*.5,s*.3,0,Math.PI*2);c.stroke();c.beginPath();c.arc(s*.5,s*.5,s*.15,0,Math.PI*2);c.stroke();ln(c,s*.5,s*.2,s*.5,s*.8,s*.07,'#fff');ln(c,s*.2,s*.5,s*.8,s*.5,s*.07,'#fff');}
+function drawStore(c,s){c.strokeStyle='#fff';c.lineWidth=s*.07;c.lineCap='round';c.beginPath();c.arc(s*.5,s*.5,s*.3,0,Math.PI*2);c.stroke();c.beginPath();c.arc(s*.5,s*.5,s*.15,0,Math.PI*2);c.stroke();_ln(c,s*.5,s*.2,s*.5,s*.8,s*.07,'#fff');_ln(c,s*.2,s*.5,s*.8,s*.5,s*.07,'#fff');}
 function drawMusic(c,s){c.fillStyle='#fff';c.beginPath();c.ellipse(s*.36,s*.65,s*.1,s*.08,-.4,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(s*.62,s*.57,s*.1,s*.08,-.4,0,Math.PI*2);c.fill();c.fillRect(s*.44,s*.28,s*.045,s*.38);c.fillRect(s*.7,s*.22,s*.045,s*.36);c.fillRect(s*.44,s*.26,s*.3,s*.07);}
-function drawCamera(c,s){c.fillStyle='#bbb';rc(c,s*.12,s*.3,s*.76,s*.44,s*.08);c.fillStyle='#aaa';rc(c,s*.34,s*.2,s*.2,s*.12,s*.04);c.fillStyle='#eee';rc(c,s*.62,s*.22,s*.14,s*.09,s*.03);circ(c,s*.5,s*.52,s*.14,'#555');circ(c,s*.5,s*.52,s*.1,'#333');circ(c,s*.5,s*.52,s*.06,'#111');circ(c,s*.43,s*.46,s*.02,'rgba(255,255,255,0.5)');}
-function drawClock(c,s){circ(c,s*.5,s*.5,s*.38,'#fff');circ(c,s*.5,s*.5,s*.34,'#f5f5f5');for(let i=0;i<12;i++){const a=i/12*Math.PI*2-Math.PI/2,r1=i%3===0?.25:.28;ln(c,s*(.5+Math.cos(a)*r1),s*(.5+Math.sin(a)*r1),s*(.5+Math.cos(a)*.32),s*(.5+Math.sin(a)*.32),s*.03,'#444');}c.lineCap='round';ln(c,s*.5,s*.5,s*(.5+Math.cos(Math.PI*.5)*.18),s*(.5+Math.sin(Math.PI*.5)*.18),s*.045,'#222');ln(c,s*.5,s*.5,s*.5,s*.22,s*.04,'#222');ln(c,s*.5,s*.58,s*.5,s*.2,s*.025,'#ff2200');circ(c,s*.5,s*.5,s*.03,'#333');}
-function drawMail(c,s){c.fillStyle='#fff';rc(c,s*.12,s*.3,s*.76,s*.44,s*.06);c.strokeStyle='#5599ee';c.lineWidth=s*.04;c.lineJoin='round';c.beginPath();c.moveTo(s*.14,s*.32);c.lineTo(s*.5,s*.56);c.lineTo(s*.86,s*.32);c.stroke();}
-function drawMessage(c,s){c.fillStyle='#fff';c.beginPath();c.moveTo(s*.2,s*.24);c.lineTo(s*.8,s*.24);c.quadraticCurveTo(s*.88,s*.24,s*.88,s*.4);c.lineTo(s*.88,s*.62);c.quadraticCurveTo(s*.88,s*.72,s*.78,s*.72);c.lineTo(s*.42,s*.72);c.lineTo(s*.28,s*.86);c.lineTo(s*.3,s*.72);c.lineTo(s*.22,s*.72);c.quadraticCurveTo(s*.12,s*.72,s*.12,s*.62);c.lineTo(s*.12,s*.4);c.quadraticCurveTo(s*.12,s*.24,s*.2,s*.24);c.closePath();c.fill();}
+function drawCamera(c,s){c.fillStyle='#bbb';_rc(c,s*.12,s*.3,s*.76,s*.44,s*.08);c.fillStyle='#aaa';_rc(c,s*.34,s*.2,s*.2,s*.12,s*.04);_ci(c,s*.5,s*.52,s*.14,'#555');_ci(c,s*.5,s*.52,s*.1,'#333');_ci(c,s*.5,s*.52,s*.06,'#111');_ci(c,s*.43,s*.46,s*.02,'rgba(255,255,255,.5)');}
+function drawClock(c,s){_ci(c,s*.5,s*.5,s*.38,'#fff');_ci(c,s*.5,s*.5,s*.34,'#f5f5f5');for(let i=0;i<12;i++){const a=i/12*Math.PI*2-Math.PI/2,r1=i%3===0?.25:.28;_ln(c,s*(.5+Math.cos(a)*r1),s*(.5+Math.sin(a)*r1),s*(.5+Math.cos(a)*.32),s*(.5+Math.sin(a)*.32),s*.03,'#444');}c.lineCap='round';_ln(c,s*.5,s*.5,s*(.5+Math.cos(Math.PI*.5)*.18),s*(.5+Math.sin(Math.PI*.5)*.18),s*.045,'#222');_ln(c,s*.5,s*.5,s*.5,s*.22,s*.04,'#222');_ln(c,s*.5,s*.58,s*.5,s*.2,s*.025,'#f20');_ci(c,s*.5,s*.5,s*.03,'#333');}
+function drawMail(c,s){c.fillStyle='#fff';_rc(c,s*.12,s*.3,s*.76,s*.44,s*.06);c.strokeStyle='#5599ee';c.lineWidth=s*.04;c.lineJoin='round';c.beginPath();c.moveTo(s*.14,s*.32);c.lineTo(s*.5,s*.56);c.lineTo(s*.86,s*.32);c.stroke();}
+function drawMsg(c,s){c.fillStyle='#fff';c.beginPath();c.moveTo(s*.2,s*.24);c.lineTo(s*.8,s*.24);c.quadraticCurveTo(s*.88,s*.24,s*.88,s*.4);c.lineTo(s*.88,s*.62);c.quadraticCurveTo(s*.88,s*.72,s*.78,s*.72);c.lineTo(s*.42,s*.72);c.lineTo(s*.28,s*.86);c.lineTo(s*.3,s*.72);c.lineTo(s*.22,s*.72);c.quadraticCurveTo(s*.12,s*.72,s*.12,s*.62);c.lineTo(s*.12,s*.4);c.quadraticCurveTo(s*.12,s*.24,s*.2,s*.24);c.closePath();c.fill();}
 function drawPhone(c,s){c.fillStyle='#fff';c.save();c.translate(s*.5,s*.5);c.rotate(.22*Math.PI);c.beginPath();c.ellipse(-s*.14,-s*.22,s*.1,s*.17,0,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(s*.14,s*.22,s*.1,s*.17,0,0,Math.PI*2);c.fill();c.fillRect(-s*.08,-s*.07,s*.16,s*.14);c.restore();}
-function drawCompass(c,s){circ(c,s*.5,s*.5,s*.36,'rgba(100,180,255,0.25)');c.strokeStyle='rgba(255,255,255,0.55)';c.lineWidth=s*.04;c.beginPath();c.arc(s*.5,s*.5,s*.34,0,Math.PI*2);c.stroke();c.fillStyle='rgba(255,255,255,0.5)';c.font=`bold ${s*.11}px sans-serif`;c.textAlign='center';c.fillText('N',s*.5,s*.22);c.fillText('S',s*.5,s*.86);c.fillText('E',s*.83,s*.55);c.fillText('W',s*.17,s*.55);c.save();c.translate(s*.5,s*.5);c.rotate(.6);c.fillStyle='#ff4422';c.beginPath();c.moveTo(0,-s*.24);c.lineTo(s*.05,0);c.lineTo(0,s*.06);c.lineTo(-s*.05,0);c.closePath();c.fill();c.fillStyle='#ddd';c.beginPath();c.moveTo(0,s*.06);c.lineTo(s*.05,0);c.lineTo(0,s*.24);c.lineTo(-s*.05,0);c.closePath();c.fill();c.restore();circ(c,s*.5,s*.5,s*.04,'#fff');}
-function drawWeather(c,s){for(let i=0;i<8;i++){const a=i/8*Math.PI*2;ln(c,s*(.44+Math.cos(a)*.22),s*(.46+Math.sin(a)*.22),s*(.44+Math.cos(a)*.3),s*(.46+Math.sin(a)*.3),s*.04,'#ffcc00');}circ(c,s*.44,s*.46,s*.16,'#ffdd00');circ(c,s*.44,s*.46,s*.11,'#ffee55');c.fillStyle='#fff';c.font=`bold ${s*.16}px sans-serif`;c.textAlign='left';c.fillText('23°',s*.08,s*.86);}
-function drawSettings(c,s){const t=8;c.fillStyle='#ccc';c.beginPath();for(let i=0;i<t;i++){const a1=i/t*Math.PI*2,a2=(i+.38)/t*Math.PI*2,a3=(i+.62)/t*Math.PI*2,a4=(i+1)/t*Math.PI*2;if(i===0)c.moveTo(s*(.5+Math.cos(a1)*.22),s*(.5+Math.sin(a1)*.22));c.lineTo(s*(.5+Math.cos(a1)*.33),s*(.5+Math.sin(a1)*.33));c.arc(s*.5,s*.5,s*.33,a1,a2);c.lineTo(s*(.5+Math.cos(a3)*.22),s*(.5+Math.sin(a3)*.22));c.arc(s*.5,s*.5,s*.22,a3,a4);}c.closePath();c.fill();circ(c,s*.5,s*.5,s*.12,'#666');}
-function drawStocks(c,s){[.38,.55,.72].forEach(y=>{ln(c,s*.08,s*y,s*.9,s*y,s*.015,'rgba(255,255,255,0.1)');});const pts=[[.08,.72],[.22,.54],[.36,.62],[.5,.36],[.62,.48],[.75,.26],[.9,.34]];c.strokeStyle='#00ccff';c.lineWidth=s*.038;c.lineJoin='round';c.lineCap='round';c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(s*x,s*y):c.moveTo(s*x,s*y));c.stroke();c.lineTo(s*.9,s*.88);c.lineTo(s*.08,s*.88);c.closePath();c.fillStyle='rgba(0,200,255,0.12)';c.fill();}
-function drawClapper(c,s){c.fillStyle='#ddd';rc(c,s*.1,s*.3,s*.8,s*.46,s*.06);c.fillStyle='#222';rc(c,s*.1,s*.18,s*.8,s*.16,s*.05);c.fillStyle='#ddd';for(let i=0;i<4;i++){c.save();c.translate(s*(.2+i*.2),s*.19);c.rotate(-.32);c.fillRect(-s*.04,-s*.09,s*.08,s*.16);c.restore();}}
-function drawMap(c,s){c.strokeStyle='rgba(255,255,255,0.8)';c.lineWidth=s*.06;c.lineJoin='round';c.beginPath();c.moveTo(s*.18,s*.1);c.lineTo(s*.5,s*.55);c.lineTo(s*.82,s*.1);c.stroke();c.beginPath();c.moveTo(s*.08,s*.9);c.lineTo(s*.5,s*.55);c.lineTo(s*.92,s*.9);c.stroke();circ(c,s*.5,s*.36,s*.14,'#ff3344');circ(c,s*.5,s*.36,s*.07,'rgba(255,255,255,0.9)');c.fillStyle='#ff3344';c.beginPath();c.moveTo(s*.41,s*.44);c.lineTo(s*.59,s*.44);c.lineTo(s*.5,s*.6);c.closePath();c.fill();}
-function drawNotes(c,s){c.fillStyle='#fffde0';rc(c,s*.14,s*.1,s*.72,s*.82,s*.05);[.34,.46,.58,.7,.8].forEach(y=>{ln(c,s*.26,s*y,s*.8,s*y,s*.022,'rgba(200,160,0,0.35)');});ln(c,s*.28,s*.12,s*.28,s*.9,s*.022,'rgba(255,80,80,0.45)');c.fillStyle='#8b5e3c';c.fillRect(s*.13,s*.1,s*.055,s*.82);}
-function drawPodcast(c,s){circ(c,s*.5,s*.4,s*.2,'rgba(255,255,255,0.9)');c.strokeStyle='rgba(255,255,255,0.55)';c.lineWidth=s*.04;c.lineCap='round';[[.3,-.85,-.15],[.4,-.82,-.18],[.5,-.78,-.22]].forEach(([r,a1,a2])=>{c.beginPath();c.arc(s*.5,s*.4,s*r,Math.PI*a1,Math.PI*a2);c.stroke();c.beginPath();c.arc(s*.5,s*.4,s*r,Math.PI*(1-a2),Math.PI*(1-a1));c.stroke();});ln(c,s*.5,s*.6,s*.5,s*.78,s*.04,'rgba(255,255,255,0.8)');ln(c,s*.34,s*.78,s*.66,s*.78,s*.04,'rgba(255,255,255,0.8)');}
-function drawContacts(c,s){c.fillStyle='#fff';circ(c,s*.44,s*.34,s*.15,'#fff');c.beginPath();c.arc(s*.44,s*.82,s*.26,-Math.PI,0);c.fill();['A','B','C','D','E'].forEach((l,i)=>{c.fillStyle='rgba(200,140,60,0.7)';c.fillRect(s*.8,s*(.2+i*.13),s*.09,s*.1);c.fillStyle='#fff';c.font=`${s*.07}px sans-serif`;c.textAlign='center';c.fillText(l,s*.845,s*(.285+i*.13));});}
-function drawPhotos(c,s){[['#ff6699',0],['#ff9933',.52],['#ffee00',1.05],['#66cc33',1.57],['#3399ff',2.1],['#aa44ff',2.62],['#ff3366',3.14],['#ff6600',3.67]].forEach(([col,a])=>{c.fillStyle=col;c.beginPath();c.ellipse(s*(.5+Math.cos(a)*.2),s*(.5+Math.sin(a)*.2),s*.12,s*.19,a,0,Math.PI*2);c.fill();});circ(c,s*.5,s*.5,s*.12,'#ffee44');}
-function drawCalculator(c,s){c.fillStyle='#444';rc(c,s*.15,s*.12,s*.7,s*.78,s*.08);c.fillStyle='#1a1a1a';rc(c,s*.22,s*.18,s*.56,s*.2,s*.04);c.fillStyle='#aaffaa';c.font=`${s*.15}px monospace`;c.textAlign='right';c.fillText('42',s*.74,s*.34);const flat=[['#ff9500','+'],[null,'−'],[null,'×'],[null,'÷'],['#888','7'],['#888','8'],['#888','9'],['#888','4'],['#888','5'],['#888','6'],['#888','1'],['#888','2'],['#888','3']];const bw=s*.15,bh=s*.1,gap=s*.035,bx=s*.2,by=s*.43;flat.forEach(([bg,label],idx)=>{const col=idx%4,row=Math.floor(idx/4),x=bx+col*(bw+gap),y=by+row*(bh+gap);c.fillStyle=bg||'#777';rc(c,x,y,bw,bh,s*.025);c.fillStyle='#fff';c.font=`${s*.09}px sans-serif`;c.textAlign='center';c.fillText(label,x+bw/2,y+bh*.72);});}
-function drawHealth(c,s){c.fillStyle='#fff';c.beginPath();c.moveTo(s*.5,s*.72);c.bezierCurveTo(s*.1,s*.48,s*.1,s*.22,s*.5,s*.38);c.bezierCurveTo(s*.9,s*.22,s*.9,s*.48,s*.5,s*.72);c.fill();c.strokeStyle='rgba(255,80,100,0.7)';c.lineWidth=s*.04;c.lineJoin='round';c.lineCap='round';c.beginPath();c.moveTo(s*.24,s*.48);c.lineTo(s*.36,s*.48);c.lineTo(s*.42,s*.36);c.lineTo(s*.5,s*.58);c.lineTo(s*.58,s*.4);c.lineTo(s*.64,s*.48);c.lineTo(s*.76,s*.48);c.stroke();}
-function drawWallet(c,s){c.fillStyle='#666';rc(c,s*.1,s*.28,s*.8,s*.5,s*.08);c.fillStyle='#555';rc(c,s*.1,s*.22,s*.8,s*.12,s*.04);c.fillStyle='#777';rc(c,s*.56,s*.38,s*.3,s*.24,s*.06);circ(c,s*.71,s*.5,s*.08,'#999');circ(c,s*.71,s*.5,s*.04,'#666');c.fillStyle='#ffcc44';rc(c,s*.16,s*.36,s*.3,s*.16,s*.04);c.fillStyle='#44aaff';rc(c,s*.16,s*.54,s*.3,s*.16,s*.04);}
-function drawGame(c,s){c.fillStyle='rgba(255,255,255,0.88)';c.beginPath();c.ellipse(s*.5,s*.52,s*.38,s*.26,0,0,Math.PI*2);c.fill();circ(c,s*.7,s*.42,s*.07,'#ff4422');circ(c,s*.78,s*.52,s*.07,'#3388ff');circ(c,s*.62,s*.52,s*.07,'#33cc44');circ(c,s*.7,s*.62,s*.07,'#ffcc00');c.fillStyle='#bbb';c.fillRect(s*.28,s*.49,s*.12,s*.04);c.fillRect(s*.32,s*.45,s*.04,s*.12);circ(c,s*.2,s*.52,s*.05,'#ccc');circ(c,s*.32,s*.52,s*.05,'#ccc');}
-function drawRain(c,s){c.fillStyle='rgba(255,255,255,0.82)';c.beginPath();c.arc(s*.36,s*.44,s*.16,0,Math.PI*2);c.fill();c.beginPath();c.arc(s*.52,s*.37,s*.2,0,Math.PI*2);c.fill();c.beginPath();c.arc(s*.68,s*.44,s*.14,0,Math.PI*2);c.fill();c.fillRect(s*.2,s*.44,s*.62,s*.14);[[.3,.64,.24,.77],[.42,.66,.36,.79],[.55,.64,.49,.77],[.67,.66,.61,.79]].forEach(([x1,y1,x2,y2])=>{ln(c,s*x1,s*y1,s*x2,s*y2,s*.035,'rgba(120,180,255,0.8)');});}
-function drawBook(c,s){c.fillStyle='#fff';rc(c,s*.2,s*.12,s*.6,s*.76,s*.05);c.fillStyle='rgba(255,120,0,0.2)';c.fillRect(s*.2,s*.12,s*.055,s*.76);[.3,.4,.5,.6,.7,.78].forEach(y=>{ln(c,s*.3,s*y,s*.74,s*y,s*.022,'rgba(0,0,0,0.18)');});}
-function drawFlash(c,s){c.fillStyle='#777';rc(c,s*.38,s*.14,s*.24,s*.58,s*.09);c.fillStyle='#ffee99';c.beginPath();c.moveTo(s*.33,s*.7);c.lineTo(s*.67,s*.7);c.lineTo(s*.8,s*.9);c.lineTo(s*.2,s*.9);c.closePath();c.fill();circ(c,s*.5,s*.8,s*.07,'#fffacc');circ(c,s*.5,s*.26,s*.07,'#999');circ(c,s*.5,s*.26,s*.04,'#bbb');}
+function drawCompass(c,s){_ci(c,s*.5,s*.5,s*.36,'rgba(100,180,255,.2)');c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=s*.04;c.beginPath();c.arc(s*.5,s*.5,s*.34,0,Math.PI*2);c.stroke();c.fillStyle='rgba(255,255,255,.5)';c.font=`bold ${s*.11}px sans-serif`;c.textAlign='center';c.fillText('N',s*.5,s*.22);c.fillText('S',s*.5,s*.86);c.fillText('E',s*.83,s*.55);c.fillText('W',s*.17,s*.55);c.save();c.translate(s*.5,s*.5);c.rotate(.6);c.fillStyle='#f42';c.beginPath();c.moveTo(0,-s*.24);c.lineTo(s*.05,0);c.lineTo(0,s*.06);c.lineTo(-s*.05,0);c.closePath();c.fill();c.fillStyle='#ddd';c.beginPath();c.moveTo(0,s*.06);c.lineTo(s*.05,0);c.lineTo(0,s*.24);c.lineTo(-s*.05,0);c.closePath();c.fill();c.restore();_ci(c,s*.5,s*.5,s*.04,'#fff');}
+function drawWeather(c,s){for(let i=0;i<8;i++){const a=i/8*Math.PI*2;_ln(c,s*(.44+Math.cos(a)*.22),s*(.46+Math.sin(a)*.22),s*(.44+Math.cos(a)*.3),s*(.46+Math.sin(a)*.3),s*.04,'#fc0');}_ci(c,s*.44,s*.46,s*.16,'#fd0');_ci(c,s*.44,s*.46,s*.11,'#fe4');c.fillStyle='#fff';c.font=`bold ${s*.16}px sans-serif`;c.textAlign='left';c.fillText('23°',s*.08,s*.86);}
+function drawSettings(c,s){const t=8;c.fillStyle='#ccc';c.beginPath();for(let i=0;i<t;i++){const a1=i/t*Math.PI*2,a2=(i+.38)/t*Math.PI*2,a3=(i+.62)/t*Math.PI*2,a4=(i+1)/t*Math.PI*2;if(i===0)c.moveTo(s*(.5+Math.cos(a1)*.22),s*(.5+Math.sin(a1)*.22));c.lineTo(s*(.5+Math.cos(a1)*.33),s*(.5+Math.sin(a1)*.33));c.arc(s*.5,s*.5,s*.33,a1,a2);c.lineTo(s*(.5+Math.cos(a3)*.22),s*(.5+Math.sin(a3)*.22));c.arc(s*.5,s*.5,s*.22,a3,a4);}c.closePath();c.fill();_ci(c,s*.5,s*.5,s*.12,'#666');}
+function drawStocks(c,s){const pts=[[.08,.72],[.22,.54],[.36,.62],[.5,.36],[.62,.48],[.75,.26],[.9,.34]];c.strokeStyle='#0cf';c.lineWidth=s*.038;c.lineJoin='round';c.lineCap='round';c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(s*x,s*y):c.moveTo(s*x,s*y));c.stroke();c.lineTo(s*.9,s*.88);c.lineTo(s*.08,s*.88);c.closePath();c.fillStyle='rgba(0,200,255,.12)';c.fill();}
+function drawClapper(c,s){c.fillStyle='#ddd';_rc(c,s*.1,s*.3,s*.8,s*.46,s*.06);c.fillStyle='#222';_rc(c,s*.1,s*.18,s*.8,s*.16,s*.05);c.fillStyle='#ddd';for(let i=0;i<4;i++){c.save();c.translate(s*(.2+i*.2),s*.19);c.rotate(-.32);c.fillRect(-s*.04,-s*.09,s*.08,s*.16);c.restore();}}
+function drawMap(c,s){c.strokeStyle='rgba(255,255,255,.8)';c.lineWidth=s*.06;c.lineJoin='round';c.beginPath();c.moveTo(s*.18,s*.1);c.lineTo(s*.5,s*.55);c.lineTo(s*.82,s*.1);c.stroke();c.beginPath();c.moveTo(s*.08,s*.9);c.lineTo(s*.5,s*.55);c.lineTo(s*.92,s*.9);c.stroke();_ci(c,s*.5,s*.36,s*.14,'#f33');_ci(c,s*.5,s*.36,s*.07,'rgba(255,255,255,.9)');c.fillStyle='#f33';c.beginPath();c.moveTo(s*.41,s*.44);c.lineTo(s*.59,s*.44);c.lineTo(s*.5,s*.6);c.closePath();c.fill();}
+function drawNotes(c,s){c.fillStyle='#fffde0';_rc(c,s*.14,s*.1,s*.72,s*.82,s*.05);[.34,.46,.58,.7,.8].forEach(y=>{_ln(c,s*.26,s*y,s*.8,s*y,s*.022,'rgba(200,160,0,.35)');});_ln(c,s*.28,s*.12,s*.28,s*.9,s*.022,'rgba(255,80,80,.45)');c.fillStyle='#8b5e3c';c.fillRect(s*.13,s*.1,s*.055,s*.82);}
+function drawPodcast(c,s){_ci(c,s*.5,s*.4,s*.2,'rgba(255,255,255,.9)');c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=s*.04;c.lineCap='round';[[.3,-.85,-.15],[.4,-.82,-.18],[.5,-.78,-.22]].forEach(([r,a1,a2])=>{c.beginPath();c.arc(s*.5,s*.4,s*r,Math.PI*a1,Math.PI*a2);c.stroke();c.beginPath();c.arc(s*.5,s*.4,s*r,Math.PI*(1-a2),Math.PI*(1-a1));c.stroke();});_ln(c,s*.5,s*.6,s*.5,s*.78,s*.04,'rgba(255,255,255,.8)');_ln(c,s*.34,s*.78,s*.66,s*.78,s*.04,'rgba(255,255,255,.8)');}
+function drawContacts(c,s){c.fillStyle='#fff';_ci(c,s*.44,s*.34,s*.15,'#fff');c.beginPath();c.arc(s*.44,s*.82,s*.26,-Math.PI,0);c.fill();['A','B','C','D','E'].forEach((l,i)=>{c.fillStyle='rgba(200,140,60,.7)';c.fillRect(s*.8,s*(.2+i*.13),s*.09,s*.1);c.fillStyle='#fff';c.font=`${s*.07}px sans-serif`;c.textAlign='center';c.fillText(l,s*.845,s*(.285+i*.13));});}
+function drawPhotos(c,s){[['#f69',0],['#f93',.52],['#fe0',1.05],['#6c3',1.57],['#39f',2.1],['#a4f',2.62],['#f36',3.14],['#f60',3.67]].forEach(([col,a])=>{c.fillStyle=col;c.beginPath();c.ellipse(s*(.5+Math.cos(a)*.2),s*(.5+Math.sin(a)*.2),s*.12,s*.19,a,0,Math.PI*2);c.fill();});_ci(c,s*.5,s*.5,s*.12,'#fe4');}
+function drawCalc(c,s){c.fillStyle='#444';_rc(c,s*.15,s*.12,s*.7,s*.78,s*.08);c.fillStyle='#1a1a1a';_rc(c,s*.22,s*.18,s*.56,s*.2,s*.04);c.fillStyle='#afa';c.font=`${s*.15}px monospace`;c.textAlign='right';c.fillText('42',s*.74,s*.34);[['#f90','+'],[null,'−'],[null,'×'],[null,'÷'],['#888','7'],['#888','8'],['#888','9'],['#888','4'],['#888','5'],['#888','6'],['#888','1'],['#888','2'],['#888','3']].forEach(([bg,label],idx)=>{const col=idx%4,row=Math.floor(idx/4),x=s*.2+col*(s*.15+s*.035),y=s*.43+row*(s*.1+s*.035);c.fillStyle=bg||'#777';_rc(c,x,y,s*.15,s*.1,s*.025);c.fillStyle='#fff';c.font=`${s*.09}px sans-serif`;c.textAlign='center';c.fillText(label,x+s*.075,y+s*.072);});}
+function drawHealth(c,s){c.fillStyle='#fff';c.beginPath();c.moveTo(s*.5,s*.72);c.bezierCurveTo(s*.1,s*.48,s*.1,s*.22,s*.5,s*.38);c.bezierCurveTo(s*.9,s*.22,s*.9,s*.48,s*.5,s*.72);c.fill();c.strokeStyle='rgba(255,80,100,.7)';c.lineWidth=s*.04;c.lineJoin='round';c.lineCap='round';c.beginPath();c.moveTo(s*.24,s*.48);c.lineTo(s*.36,s*.48);c.lineTo(s*.42,s*.36);c.lineTo(s*.5,s*.58);c.lineTo(s*.58,s*.4);c.lineTo(s*.64,s*.48);c.lineTo(s*.76,s*.48);c.stroke();}
+function drawWallet(c,s){c.fillStyle='#666';_rc(c,s*.1,s*.28,s*.8,s*.5,s*.08);c.fillStyle='#555';_rc(c,s*.1,s*.22,s*.8,s*.12,s*.04);c.fillStyle='#777';_rc(c,s*.56,s*.38,s*.3,s*.24,s*.06);_ci(c,s*.71,s*.5,s*.08,'#999');_ci(c,s*.71,s*.5,s*.04,'#666');c.fillStyle='#fc4';_rc(c,s*.16,s*.36,s*.3,s*.16,s*.04);c.fillStyle='#4af';_rc(c,s*.16,s*.54,s*.3,s*.16,s*.04);}
+function drawGame(c,s){c.fillStyle='rgba(255,255,255,.88)';c.beginPath();c.ellipse(s*.5,s*.52,s*.38,s*.26,0,0,Math.PI*2);c.fill();_ci(c,s*.7,s*.42,s*.07,'#f42');_ci(c,s*.78,s*.52,s*.07,'#38f');_ci(c,s*.62,s*.52,s*.07,'#3c4');_ci(c,s*.7,s*.62,s*.07,'#fc0');c.fillStyle='#bbb';c.fillRect(s*.28,s*.49,s*.12,s*.04);c.fillRect(s*.32,s*.45,s*.04,s*.12);}
+function drawRain(c,s){c.fillStyle='rgba(255,255,255,.82)';c.beginPath();c.arc(s*.36,s*.44,s*.16,0,Math.PI*2);c.fill();c.beginPath();c.arc(s*.52,s*.37,s*.2,0,Math.PI*2);c.fill();c.beginPath();c.arc(s*.68,s*.44,s*.14,0,Math.PI*2);c.fill();c.fillRect(s*.2,s*.44,s*.62,s*.14);[[.3,.64,.24,.77],[.42,.66,.36,.79],[.55,.64,.49,.77],[.67,.66,.61,.79]].forEach(([x1,y1,x2,y2])=>{_ln(c,s*x1,s*y1,s*x2,s*y2,s*.035,'rgba(120,180,255,.8)');});}
+function drawBook(c,s){c.fillStyle='#fff';_rc(c,s*.2,s*.12,s*.6,s*.76,s*.05);c.fillStyle='rgba(255,120,0,.2)';c.fillRect(s*.2,s*.12,s*.055,s*.76);[.3,.4,.5,.6,.7,.78].forEach(y=>{_ln(c,s*.3,s*y,s*.74,s*y,s*.022,'rgba(0,0,0,.18)');});}
+function drawFlash(c,s){c.fillStyle='#777';_rc(c,s*.38,s*.14,s*.24,s*.58,s*.09);c.fillStyle='#fe9';c.beginPath();c.moveTo(s*.33,s*.7);c.lineTo(s*.67,s*.7);c.lineTo(s*.8,s*.9);c.lineTo(s*.2,s*.9);c.closePath();c.fill();_ci(c,s*.5,s*.8,s*.07,'#ffb');_ci(c,s*.5,s*.26,s*.07,'#999');_ci(c,s*.5,s*.26,s*.04,'#bbb');}
 
-// ═══════════════════════════════════════════════════════════
-// PRE-RENDER ICONS
-// ═══════════════════════════════════════════════════════════
-const ICON_RENDER = 180;
+// ─────────────────────────────────────────────
+// PRE-RENDER to offscreen canvases
+// ─────────────────────────────────────────────
+const IR = 180; // icon render resolution
 const iconCache = ICONS.map(icon => {
   const oc = document.createElement('canvas');
-  oc.width = oc.height = ICON_RENDER;
+  oc.width = oc.height = IR;
   const c2 = oc.getContext('2d');
-  const S = ICON_RENDER, r = S*0.22;
-  c2.beginPath();
-  c2.moveTo(r,0);c2.lineTo(S-r,0);c2.quadraticCurveTo(S,0,S,r);
-  c2.lineTo(S,S-r);c2.quadraticCurveTo(S,S,S-r,S);
-  c2.lineTo(r,S);c2.quadraticCurveTo(0,S,0,S-r);
-  c2.lineTo(0,r);c2.quadraticCurveTo(0,0,r,0);c2.closePath();
-  const grd = c2.createLinearGradient(0,0,0,S);
-  grd.addColorStop(0,icon.grad[0]);grd.addColorStop(1,icon.grad[1]);
-  c2.fillStyle=grd;c2.fill();
+  const S=IR, r=S*.22;
+  c2.beginPath();c2.moveTo(r,0);c2.lineTo(S-r,0);c2.quadraticCurveTo(S,0,S,r);c2.lineTo(S,S-r);c2.quadraticCurveTo(S,S,S-r,S);c2.lineTo(r,S);c2.quadraticCurveTo(0,S,0,S-r);c2.lineTo(0,r);c2.quadraticCurveTo(0,0,r,0);c2.closePath();
+  const g=c2.createLinearGradient(0,0,0,S);g.addColorStop(0,icon.grad[0]);g.addColorStop(1,icon.grad[1]);c2.fillStyle=g;c2.fill();
   c2.save();c2.clip();
-  const shine = c2.createLinearGradient(0,0,0,S*.5);
-  shine.addColorStop(0,'rgba(255,255,255,0.38)');shine.addColorStop(1,'rgba(255,255,255,0)');
-  c2.fillStyle=shine;c2.fillRect(0,0,S,S*.5);
-  icon.draw(c2,S);
-  c2.restore();
+  const sh=c2.createLinearGradient(0,0,0,S*.5);sh.addColorStop(0,'rgba(255,255,255,.38)');sh.addColorStop(1,'rgba(255,255,255,0)');c2.fillStyle=sh;c2.fillRect(0,0,S,S*.5);
+  icon.draw(c2,S);c2.restore();
   return oc;
 });
 
-// ═══════════════════════════════════════════════════════════
-// LAYOUT (iPhone grid specs)
-// ═══════════════════════════════════════════════════════════
-const COLS = 4;
-function computeLayout(cw) {
-  const sc = Math.min(cw/390, 1.2);
+// ─────────────────────────────────────────────
+// LAYOUT  (iPhone grid spec)
+// ─────────────────────────────────────────────
+const COLS=4;
+function layout(cw){
+  const sc=Math.min(cw/390,1.3);
   return {
-    icon: Math.round(60*sc),
-    hgap: Math.round(18*sc),
-    vgap: Math.round(23*sc),
-    margin: Math.round(20*sc),
-    label: Math.round(18*sc),
+    ic:  Math.round(60*sc),
+    hg:  Math.round(18*sc),
+    vg:  Math.round(23*sc),
+    lh:  Math.round(18*sc),
+    top: Math.round(62*sc),
     sc
   };
 }
-function homePositions(cw, ch) {
-  const L = computeLayout(cw);
-  const totalW = COLS*L.icon + (COLS-1)*L.hgap;
-  const sx = (cw-totalW)/2 + L.icon/2;
-  const sy = Math.round(62*L.sc) + L.icon/2;
+function homePos(cw,ch){
+  const L=layout(cw);
+  const tw=COLS*L.ic+(COLS-1)*L.hg;
+  const sx=(cw-tw)/2+L.ic/2;
+  const sy=L.top+L.ic/2;
   return ICONS.map((_,i)=>({
-    x: sx + (i%COLS)*(L.icon+L.hgap),
-    y: sy + Math.floor(i/COLS)*(L.icon+L.label+L.vgap)
+    x: sx+(i%COLS)*(L.ic+L.hg),
+    y: sy+Math.floor(i/COLS)*(L.ic+L.lh+L.vg)
   }));
 }
 
-// ═══════════════════════════════════════════════════════════
-// GRID OVERLAY
-// ═══════════════════════════════════════════════════════════
-function buildGrid(cw) {
-  const L = computeLayout(cw);
-  const cont = document.getElementById('grid-rows');
-  cont.innerHTML='';
-  cont.style.cssText=`display:flex;flex-direction:column;align-items:center;gap:${L.vgap-4}px;padding-top:${Math.round(14*L.sc)}px;`;
-  for(let row=0;row<Math.ceil(ICONS.length/COLS);row++){
-    const rowEl=document.createElement('div');
-    rowEl.style.cssText=`display:flex;gap:${L.hgap}px;`;
-    for(let col=0;col<COLS;col++){
-      const idx=row*COLS+col;if(idx>=ICONS.length)break;
-      const item=document.createElement('div');
-      item.style.cssText=`display:flex;flex-direction:column;align-items:center;`;
-      const ic=document.createElement('canvas');
-      ic.width=ic.height=L.icon;
-      ic.style.cssText=`width:${L.icon}px;height:${L.icon}px;border-radius:${Math.round(L.icon*.22)}px;display:block;box-shadow:0 2px 12px rgba(0,0,0,.55);`;
-      ic.getContext('2d').drawImage(iconCache[idx],0,0,L.icon,L.icon);
-      const lbl=document.createElement('div');
-      lbl.style.cssText=`font-size:${Math.round(10*L.sc)}px;color:rgba(255,255,255,.88);margin-top:3px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.9);`;
-      lbl.textContent=ICONS[idx].label;
-      item.appendChild(ic);item.appendChild(lbl);rowEl.appendChild(item);
+// ─────────────────────────────────────────────
+// MATTER.JS
+// ─────────────────────────────────────────────
+const {Engine,Runner,Bodies,Body,World,Events,Mouse,MouseConstraint,Composite}=Matter;
+
+let engine, mRunner, iconBodies=[], walls=[];
+let W, H;
+let gyroOn=false, gyroListenerAdded=false;
+let mode='grid'; // 'grid' | 'physics' | 'homing'
+
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const wrap=document.getElementById('canvas-wrap');
+
+// ─── Canvas sizing ───────────────────────────
+function sizeCanvas(){
+  const r=wrap.getBoundingClientRect();
+  W=r.width; H=r.height;
+  canvas.width=Math.round(W*devicePixelRatio);
+  canvas.height=Math.round(H*devicePixelRatio);
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+
+// ─── Draw one icon ───────────────────────────
+function drawIcon(idx, x, y, size, angle, alpha){
+  ctx.save();
+  ctx.globalAlpha = alpha ?? 1;
+  ctx.translate(x,y);
+  ctx.rotate(angle??0);
+  ctx.shadowColor='rgba(0,0,0,.6)';
+  ctx.shadowBlur=14;
+  ctx.shadowOffsetY=4;
+  ctx.drawImage(iconCache[idx],-size/2,-size/2,size,size);
+  ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+  // Upright label (rotate back)
+  ctx.rotate(-(angle??0));
+  ctx.fillStyle='rgba(255,255,255,.88)';
+  ctx.font=`${Math.round(size*.145)}px -apple-system,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(ICONS[idx].label,0,size/2+size*.22);
+  ctx.globalAlpha=1;
+  ctx.restore();
+}
+
+// ─── RENDER LOOP ─────────────────────────────
+let rafId=null;
+function startRender(){
+  if(rafId) return;
+  (function loop(){
+    rafId=requestAnimationFrame(loop);
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    ctx.clearRect(0,0,W,H);
+
+    if(mode==='grid'){
+      // Draw icons at static home positions
+      const homes=homePos(W,H);
+      const L=layout(W);
+      homes.forEach((h,i)=>drawIcon(i,h.x,h.y,L.ic,0,1));
+
+    } else if(mode==='physics' || mode==='homing'){
+      // Draw from Matter.js body positions
+      const L=layout(W);
+      iconBodies.forEach(b=>{
+        drawIcon(b.iconIdx,b.position.x,b.position.y,L.ic,b.angle,1);
+      });
     }
-    cont.appendChild(rowEl);
-  }
+  })();
 }
 
-// ═══════════════════════════════════════════════════════════
-// MATTER.JS PHYSICS WORLD
-// ═══════════════════════════════════════════════════════════
-const { Engine, Render: MRender, Runner, Bodies, Body, World, Events,
-        Mouse, MouseConstraint, Composite, Vector } = Matter;
-
-let engine, runner, bodies = [], walls = [];
-let W, H, physicsActive=false, gyroOn=false, gyroListenerAdded=false;
-let mode='normal'; // 'normal' | 'homing'
-let homingTargets=[];
-
-const cMain = document.getElementById('c-main');
-const cBg   = document.getElementById('c-bg');
-const ctxMain = cMain.getContext('2d');
-const ctxBg   = cBg.getContext('2d');
-const wrap = document.getElementById('canvas-wrap');
-
-function setCanvasSize() {
-  const rect = wrap.getBoundingClientRect();
-  W = rect.width; H = rect.height;
-  [cMain, cBg].forEach(c => {
-    c.width  = Math.round(W * devicePixelRatio);
-    c.height = Math.round(H * devicePixelRatio);
-    c.style.width  = W+'px';
-    c.style.height = H+'px';
-  });
-  // setTransform resets before scaling — avoids accumulation on resize
-  ctxMain.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-  ctxBg.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-}
-
-function buildWalls() {
-  walls.forEach(w => World.remove(engine.world, w));
-  const T = 60; // wall thickness
-  walls = [
-    Bodies.rectangle(W/2, H+T/2, W+T*2, T, {isStatic:true, label:'wall'}), // floor
-    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true, label:'wall'}), // ceiling
-    Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true, label:'wall'}), // left
-    Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true, label:'wall'}), // right
+// ─── BUILD WALLS ─────────────────────────────
+function buildWalls(){
+  walls.forEach(w=>World.remove(engine.world,w));
+  const T=80;
+  walls=[
+    Bodies.rectangle(W/2, H+T/2,  W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
+    Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
   ];
-  walls.forEach(w => {
-    w.friction = 0.6;
-    w.restitution = 0.35;
-  });
-  World.add(engine.world, walls);
+  World.add(engine.world,walls);
 }
 
-function createBody(x, y, size, idx) {
-  const b = Bodies.rectangle(x, y, size, size, {
-    restitution: 0.45,   // bounciness
-    friction: 0.55,       // surface friction → realistic spin on collision
-    frictionAir: 0.02,   // air resistance
-    density: 0.002,
-    label: 'icon_'+idx,
-  });
-  b.iconIdx = idx;
-  return b;
-}
-
-function initPhysics() {
-  engine = Engine.create({
-    gravity: { x: 0, y: 1, scale: 0.002 }
-  });
-
-  runner = Runner.create();
-  Runner.run(runner, engine);
-
+// ─── INIT PHYSICS ────────────────────────────
+function initPhysics(){
+  if(engine){
+    // Already exists — just rebuild walls for new size
+    buildWalls(); return;
+  }
+  engine=Engine.create({gravity:{x:0,y:1,scale:0.0018}});
+  mRunner=Runner.create();
+  Runner.run(mRunner,engine);
   buildWalls();
 
-  // Create icon bodies at grid positions (scattered slightly so they fall nicely)
-  const homes = homePositions(W, H);
-  const L = computeLayout(W);
-  bodies = ICONS.map((_, i) => {
-    const home = homes[i];
-    // Spawn above screen with slight random offset so they cascade down
-    const spawnY = -L.icon * 0.6 - Math.floor(i / COLS) * (L.icon + 8);
-    const spawnX = home.x + (Math.random()-0.5)*10;
-    const b = createBody(spawnX, spawnY, L.icon, i);
+  // Place icon bodies at home positions
+  const homes=homePos(W,H);
+  const L=layout(W);
+  iconBodies=ICONS.map((_,i)=>{
+    const b=Bodies.rectangle(homes[i].x,homes[i].y,L.ic,L.ic,{
+      restitution:.45,
+      friction:.55,
+      frictionAir:.018,
+      density:.002,
+      // Start completely static — gravity will move them once we set it
+    });
+    b.iconIdx=i;
     return b;
   });
-  World.add(engine.world, bodies);
+  World.add(engine.world,iconBodies);
 
-  // Touch/mouse drag
-  const mouse = Mouse.create(cMain);
-  mouse.pixelRatio = devicePixelRatio;
-  const mc = MouseConstraint.create(engine, {
+  // Touch drag
+  const mouse=Mouse.create(canvas);
+  mouse.pixelRatio=devicePixelRatio;
+  const mc=MouseConstraint.create(engine,{
     mouse,
-    constraint: { stiffness: 0.25, render: { visible: false } }
+    constraint:{stiffness:.3,render:{visible:false}}
   });
-  World.add(engine.world, mc);
+  World.add(engine.world,mc);
+  // Prevent scroll
+  canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
 }
 
-// Render loop (manual canvas draw — no built-in Matter renderer)
-function renderLoop() {
-  requestAnimationFrame(renderLoop);
-  if (!physicsActive) return;
-
-  const L = computeLayout(W);
-  const size = L.icon;
-
-  // Reapply pixel ratio transform each frame (clearRect doesn't reset it but resize might)
-  ctxMain.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-  ctxMain.clearRect(0, 0, W, H);
-
-  for (const b of bodies) {
-    const pos = b.position;
-    const angle = b.angle;
-    const idx = b.iconIdx;
-
-    ctxMain.save();
-    ctxMain.translate(pos.x, pos.y);
-    ctxMain.rotate(angle);
-
-    // Shadow
-    ctxMain.shadowColor = 'rgba(0,0,0,0.55)';
-    ctxMain.shadowBlur  = 16;
-    ctxMain.shadowOffsetY = 4;
-    ctxMain.drawImage(iconCache[idx], -size/2, -size/2, size, size);
-    ctxMain.shadowBlur = 0; ctxMain.shadowOffsetY = 0;
-
-    // Label below icon
-    ctxMain.rotate(-angle); // keep label upright
-    ctxMain.fillStyle = 'rgba(255,255,255,0.88)';
-    ctxMain.font = `${Math.round(size*0.15)}px -apple-system,sans-serif`;
-    ctxMain.textAlign = 'center';
-    ctxMain.fillText(ICONS[idx].label, 0, size/2 + size*0.22);
-
-    ctxMain.restore();
-  }
-
-  // Homing ghost dots
-  if (mode === 'homing') {
-    ctxMain.fillStyle = 'rgba(255,255,255,0.06)';
-    for (const t of homingTargets) {
-      ctxMain.beginPath();
-      ctxMain.arc(t.x, t.y, L.icon*0.48, 0, Math.PI*2);
-      ctxMain.fill();
-    }
-  }
+// ─── SWITCH TO PHYSICS MODE ──────────────────
+// Icons are already at home positions in the physics world.
+// Just switch gravity on and set mode.
+function goPhysics(){
+  if(!engine) initPhysics();
+  // Reset all bodies to home, zero velocity
+  const homes=homePos(W,H);
+  iconBodies.forEach((b,i)=>{
+    Body.setPosition(b,{x:homes[i].x,y:homes[i].y});
+    Body.setVelocity(b,{x:0,y:0});
+    Body.setAngle(b,0);
+    Body.setAngularVelocity(b,0);
+  });
+  mode='physics';
+  // Gravity pulls them down immediately
+  engine.gravity.x=0;
+  engine.gravity.y=1;
+  setBadge('重力模式 · 倾斜手机','rgba(255,255,255,.5)');
 }
 
-// ── Gyro / gravity ────────────────────────────────────────
-function setGravity(gx, gy) {
-  if (!engine || mode==='homing') return;
-  engine.gravity.x = gx;
-  engine.gravity.y = gy;
-}
+// ─── HOME (spring back) ──────────────────────
+let homingUnsub=null;
+function goHome(){
+  if(mode==='homing') return;
+  mode='homing';
+  engine.gravity.x=0; engine.gravity.y=0;
+  const targets=homePos(W,H);
+  setBadge('🏠 归位中…','rgba(255,210,60,.9)');
 
-function enableGyroSilent() {
-  if (!gyroListenerAdded) {
-    gyroListenerAdded = true;
-    window.addEventListener('deviceorientation', e => {
-      if (!gyroOn || mode==='homing') return;
-      const gx = Math.sin((e.gamma||0)*Math.PI/180);
-      const gy = Math.sin((e.beta||0) *Math.PI/180);
-      setGravity(gx, gy);
+  if(homingUnsub) Events.off(engine,'beforeUpdate',homingUnsub);
+  homingUnsub=()=>{
+    let done=true;
+    iconBodies.forEach((b,i)=>{
+      const dx=targets[i].x-b.position.x;
+      const dy=targets[i].y-b.position.y;
+      // Spring
+      Body.applyForce(b,b.position,{x:dx*.009,y:dy*.009});
+      // Damp velocity
+      Body.setVelocity(b,{x:b.velocity.x*.82,y:b.velocity.y*.82});
+      Body.setAngularVelocity(b,b.angularVelocity*.75);
+      Body.setAngle(b,b.angle*.88);
+      if(Math.sqrt(dx*dx+dy*dy)>2||Math.abs(b.velocity.x)+Math.abs(b.velocity.y)>.3) done=false;
     });
-  }
-  gyroOn = true;
-  document.getElementById('gyroBtn').classList.add('on');
-  document.getElementById('gyroBtn').textContent = '🌀';
-  if (!physicsActive) activatePhysics();
-  setBadge('🌀 陀螺仪已开启','rgba(100,220,100,0.85)');
-}
-
-function disableGyro() {
-  gyroOn = false;
-  document.getElementById('gyroBtn').classList.remove('on');
-  document.getElementById('gyroBtn').textContent = '📱';
-  if (engine) { engine.gravity.x=0; engine.gravity.y=1; }
-  setBadge('重力模式','rgba(255,255,255,0.5)');
-}
-
-// ── Activate physics ──────────────────────────────────────
-function activatePhysics() {
-  physicsActive = true;
-  const overlay = document.getElementById('grid-overlay');
-  overlay.classList.add('hidden');
-  setTimeout(()=>overlay.style.display='none', 600);
-  document.getElementById('mode-badge').style.display = 'block';
-  document.getElementById('homeBtn').style.display = 'flex';
-  document.getElementById('footer').textContent = '倾斜掉落 · 摇一下甩飞 · 摇两下归位';
-  setBadge('重力模式','rgba(255,255,255,0.5)');
-  // setCanvasSize already called on init; just init physics and start render
-  initPhysics();
-  renderLoop();
-}
-
-function setBadge(t,c){const b=document.getElementById('mode-badge');b.textContent=t;b.style.color=c||'rgba(255,255,255,0.5)';}
-
-// ── Homing ────────────────────────────────────────────────
-function triggerHoming() {
-  if (mode==='homing') return;
-  mode = 'homing';
-  homingTargets = homePositions(W, H);
-  setBadge('🏠 归位中…','rgba(255,220,80,0.9)');
-
-  // Turn off gravity so spring can pull them back cleanly
-  engine.gravity.x = 0; engine.gravity.y = 0;
-
-  // Spring each body toward its home using a tween-like force each tick
-  const unsub = Events.on(engine, 'beforeUpdate', () => {
-    let allSettled = true;
-    const L = computeLayout(W);
-    bodies.forEach((b, i) => {
-      const home = homingTargets[i];
-      const dx = home.x - b.position.x;
-      const dy = home.y - b.position.y;
-      const dist = Math.sqrt(dx*dx+dy*dy);
-      // Spring force toward home
-      const k = 0.008;
-      Body.applyForce(b, b.position, { x: dx*k, y: dy*k });
-      // Damping
-      Body.setVelocity(b, {
-        x: b.velocity.x * 0.85,
-        y: b.velocity.y * 0.85
-      });
-      // Align angle toward 0
-      Body.setAngularVelocity(b, b.angularVelocity * 0.75);
-      Body.setAngle(b, b.angle * 0.88);
-      if (dist > 3 || Math.abs(b.velocity.x)+Math.abs(b.velocity.y) > 0.3) allSettled=false;
-    });
-
-    if (allSettled) {
-      Events.off(engine, 'beforeUpdate', unsub);
-      // Snap exactly to home
-      bodies.forEach((b,i)=>{
-        Body.setPosition(b, homingTargets[i]);
+    if(done){
+      Events.off(engine,'beforeUpdate',homingUnsub);
+      iconBodies.forEach((b,i)=>{
+        Body.setPosition(b,{x:targets[i].x,y:targets[i].y});
         Body.setVelocity(b,{x:0,y:0});
         Body.setAngle(b,0);
         Body.setAngularVelocity(b,0);
       });
-      mode = 'normal';
-      engine.gravity.x=0; engine.gravity.y=1;
-      setBadge('重力模式','rgba(255,255,255,0.5)');
+      mode='physics';
+      // Restore gravity after homing
+      engine.gravity.x=0;
+      engine.gravity.y= gyroOn ? 0 : 1;
+      setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
     }
-  });
+  };
+  Events.on(engine,'beforeUpdate',homingUnsub);
 }
 
-// ── Shake ─────────────────────────────────────────────────
-function shakeAll() {
-  // Give every icon a random impulse — fly in all directions
-  bodies.forEach(b => {
-    Body.applyForce(b, b.position, {
-      x: (Math.random()-0.5)*0.08,
-      y: (Math.random()-0.5)*0.08 - 0.04
+// ─── SHAKE ALL ───────────────────────────────
+function shakeAll(){
+  if(!engine) return;
+  iconBodies.forEach(b=>{
+    Body.applyForce(b,b.position,{
+      x:(Math.random()-.5)*.12,
+      y:(Math.random()-.5)*.12-.05
     });
-    Body.setAngularVelocity(b, (Math.random()-0.5)*0.6);
+    Body.setAngularVelocity(b,(Math.random()-.5)*.8);
   });
 }
 
-// ── Shake detection ───────────────────────────────────────
-let lastAccel={x:0,y:0,z:0}, shakeCount=0, lastShakeTime=0;
-
-window.addEventListener('devicemotion', e => {
-  const acc = e.accelerationIncludingGravity; if (!acc) return;
-  const dx=acc.x-lastAccel.x, dy=acc.y-lastAccel.y, dz=acc.z-lastAccel.z;
-  const mag = Math.sqrt(dx*dx+dy*dy+dz*dz);
-  lastAccel = {x:acc.x,y:acc.y,z:acc.z};
-  const now = Date.now();
-  if (mag > 18 && now-lastShakeTime > 280) {
-    lastShakeTime = now;
-    shakeCount++;
-    if (shakeCount >= 2 && physicsActive && mode!=='homing') {
-      shakeCount = 0;
-      triggerHoming();
-      setTimeout(()=>disableGyro(), 300);
-    } else if (shakeCount === 1 && physicsActive) {
-      shakeAll();
-      if (!gyroOn) enableGyroSilent();
-    }
-    setTimeout(()=>{ shakeCount=Math.max(0,shakeCount-1); }, 700);
+// ─── GYROSCOPE ───────────────────────────────
+function enableGyro(){
+  if(!gyroListenerAdded){
+    gyroListenerAdded=true;
+    window.addEventListener('deviceorientation',e=>{
+      if(!gyroOn||mode==='homing') return;
+      engine.gravity.x=Math.sin((e.gamma||0)*Math.PI/180);
+      engine.gravity.y=Math.sin((e.beta||0) *Math.PI/180);
+    });
   }
-});
+  gyroOn=true;
+  document.getElementById('gyroBtn').classList.add('on');
+  document.getElementById('gyroBtn').textContent='🌀';
+  if(mode==='physics') setBadge('🌀 陀螺仪','rgba(100,220,100,.85)');
+}
+function disableGyro(){
+  gyroOn=false;
+  document.getElementById('gyroBtn').classList.remove('on');
+  document.getElementById('gyroBtn').textContent='📱';
+  if(engine&&mode==='physics'){engine.gravity.x=0;engine.gravity.y=1;}
+  if(mode==='physics') setBadge('重力模式','rgba(255,255,255,.5)');
+}
 
-// Desktop: mouse over canvas changes gravity direction
-cMain.addEventListener('mousemove', e => {
-  if (!physicsActive || !engine || mode==='homing') return;
-  if (e.buttons) return; // dragging
-  const rect = cMain.getBoundingClientRect();
-  const nx = ((e.clientX-rect.left)/W*2-1)*1.4;
-  const ny = ((e.clientY-rect.top) /H*2-1)*1.4;
-  setGravity(nx, ny);
-});
-
-// Home button
-document.getElementById('homeBtn').addEventListener('click', ()=>{
-  if (physicsActive) triggerHoming();
-});
-
-// ── Gyro button + prompt ──────────────────────────────────
-const gyroBtn = document.getElementById('gyroBtn');
-const gyroPrompt = document.getElementById('gyro-prompt');
-
-gyroBtn.addEventListener('click', async () => {
-  if (gyroOn) { disableGyro(); return; }
-  if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function') {
+// Gyro button
+const gyroBtn=document.getElementById('gyroBtn');
+const gyroPrompt=document.getElementById('gyro-prompt');
+gyroBtn.addEventListener('click',async()=>{
+  if(gyroOn){disableGyro();return;}
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
     gyroPrompt.classList.add('show');
   } else {
-    enableGyroSilent();
-    if (!physicsActive) activatePhysics();
+    enableGyro();
   }
 });
-document.getElementById('gyroAllowBtn').addEventListener('click', async () => {
+document.getElementById('gyroAllowBtn').addEventListener('click',async()=>{
   gyroPrompt.classList.remove('show');
-  try {
-    const p = await DeviceOrientationEvent.requestPermission();
-    if (p==='granted') enableGyroSilent();
-  } catch(e) { enableGyroSilent(); }
+  try{const p=await DeviceOrientationEvent.requestPermission();if(p==='granted')enableGyro();}
+  catch(e){enableGyro();}
 });
-document.getElementById('gyroSkipBtn').addEventListener('click', ()=>gyroPrompt.classList.remove('show'));
+document.getElementById('gyroSkipBtn').addEventListener('click',()=>gyroPrompt.classList.remove('show'));
 
-// ── Resize ────────────────────────────────────────────────
-window.addEventListener('resize', () => {
-  setCanvasSize();
-  buildGrid(W);
-  if (physicsActive && engine) buildWalls();
-});
-
-// ── Init ──────────────────────────────────────────────────
-const wrapRect = wrap.getBoundingClientRect();
-W = wrapRect.width; H = wrapRect.height;
-setCanvasSize();
-buildGrid(W);
-
-// Splash icons
-setTimeout(()=>{
-  const g=document.getElementById('spGrid');
-  for(let i=0;i<9;i++){
-    const ic=document.createElement('canvas');ic.width=ic.height=52;ic.className='sp-ic';
-    ic.style.animationDelay=`${i*.05}s`;
-    ic.getContext('2d').drawImage(iconCache[i],0,0,52,52);g.appendChild(ic);
+// Home button — switches to physics if in grid mode, else homes
+document.getElementById('homeBtn').addEventListener('click',()=>{
+  if(mode==='grid'){
+    goPhysics();
+  } else {
+    goHome();
   }
-},10);
-setTimeout(()=>{
-  document.getElementById('splash').classList.add('hide');
-  setTimeout(()=>{const s=document.getElementById('splash');if(s)s.remove();},600);
-},1800);
+});
+
+// Desktop mouse gravity
+canvas.addEventListener('mousemove',e=>{
+  if(!engine||!gyroOn||mode==='homing') return;
+  // On desktop without gyro, mouse position drives gravity
+});
+
+// ─── SHAKE DETECTION ─────────────────────────
+let lastAccel={x:0,y:0,z:0},shakeCnt=0,lastShakeT=0;
+window.addEventListener('devicemotion',e=>{
+  const a=e.accelerationIncludingGravity; if(!a) return;
+  const dx=a.x-lastAccel.x,dy=a.y-lastAccel.y,dz=a.z-lastAccel.z;
+  const mag=Math.sqrt(dx*dx+dy*dy+dz*dz);
+  lastAccel={x:a.x,y:a.y,z:a.z};
+  const now=Date.now();
+  if(mag>18&&now-lastShakeT>280){
+    lastShakeT=now; shakeCnt++;
+    if(shakeCnt>=2&&mode!=='grid'&&mode!=='homing'){
+      shakeCnt=0; goHome();
+      setTimeout(disableGyro,300);
+    } else if(shakeCnt===1&&mode==='physics'){
+      shakeAll();
+      if(!gyroOn) enableGyro();
+    }
+    setTimeout(()=>{shakeCnt=Math.max(0,shakeCnt-1);},700);
+  }
+});
+
+// ─── BADGE ───────────────────────────────────
+function setBadge(t,c){
+  const b=document.getElementById('badge');
+  b.textContent=t; b.style.color=c;
+}
+
+// ─── RESIZE ──────────────────────────────────
+window.addEventListener('resize',()=>{
+  sizeCanvas();
+  if(engine) buildWalls();
+});
+
+// ─── START ───────────────────────────────────
+sizeCanvas();
+startRender();   // Immediately draws grid (no physics yet)
+// Pre-init physics engine in background so first tap is instant
+setTimeout(()=>initPhysics(), 400);
 
 // PWA
-const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-if(isIOS&&!window.navigator.standalone){
-  const bar=document.getElementById('install-bar');bar.style.display='flex';
-  document.getElementById('installClose').addEventListener('click',()=>bar.style.display='none');
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone){
+  document.getElementById('install-bar').style.display='flex';
+  document.getElementById('installClose').addEventListener('click',e=>e.target.closest('#install-bar').style.display='none');
 }
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
