@@ -56,7 +56,7 @@ html,body{
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
 canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0;}
 #c-bg{z-index:0;}   /* background / effects layer */
-#c-main{z-index:1;} /* icons layer */
+#c-main{z-index:2;} /* icons layer — above grid overlay */
 
 #footer{padding:4px 16px calc(var(--safe-bottom)+3px);text-align:center;font-size:10px;color:rgba(255,255,255,.18);flex-shrink:0;}
 
@@ -71,7 +71,7 @@ canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0;}
 /* Grid overlay */
 #grid-overlay{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  transition:opacity .5s ease;overflow:hidden;z-index:3;
+  transition:opacity .5s ease;overflow:hidden;z-index:1;
 }
 #grid-overlay.hidden{opacity:0;pointer-events:none;}
 .hint-pulse{
@@ -315,13 +315,14 @@ function setCanvasSize() {
   const rect = wrap.getBoundingClientRect();
   W = rect.width; H = rect.height;
   [cMain, cBg].forEach(c => {
-    c.width  = W * devicePixelRatio;
-    c.height = H * devicePixelRatio;
+    c.width  = Math.round(W * devicePixelRatio);
+    c.height = Math.round(H * devicePixelRatio);
     c.style.width  = W+'px';
     c.style.height = H+'px';
   });
-  ctxMain.scale(devicePixelRatio, devicePixelRatio);
-  ctxBg.scale(devicePixelRatio, devicePixelRatio);
+  // setTransform resets before scaling — avoids accumulation on resize
+  ctxMain.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  ctxBg.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 }
 
 function buildWalls() {
@@ -393,6 +394,8 @@ function renderLoop() {
   const L = computeLayout(W);
   const size = L.icon;
 
+  // Reapply pixel ratio transform each frame (clearRect doesn't reset it but resize might)
+  ctxMain.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
   ctxMain.clearRect(0, 0, W, H);
 
   for (const b of bodies) {
@@ -470,12 +473,11 @@ function activatePhysics() {
   const overlay = document.getElementById('grid-overlay');
   overlay.classList.add('hidden');
   setTimeout(()=>overlay.style.display='none', 600);
-  cMain.style.display = 'block';
   document.getElementById('mode-badge').style.display = 'block';
   document.getElementById('homeBtn').style.display = 'flex';
   document.getElementById('footer').textContent = '倾斜掉落 · 摇一下甩飞 · 摇两下归位';
   setBadge('重力模式','rgba(255,255,255,0.5)');
-  setCanvasSize();
+  // setCanvasSize already called on init; just init physics and start render
   initPhysics();
   renderLoop();
 }
