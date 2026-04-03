@@ -339,13 +339,11 @@ function initPhysics(){
   // Magnet force applied each tick
   Events.on(engine,'beforeUpdate',()=>{
     if(!magnetActive||mode!=='physics') return;
-    const gravScale=engine.gravity.scale||0.001;
-    const gravMag=Math.sqrt(engine.gravity.x**2+engine.gravity.y**2)||1;
     iconBodies.forEach(b=>{
       const dx=magnetX-b.position.x, dy=magnetY-b.position.y;
       const dist=Math.sqrt(dx*dx+dy*dy)+1;
-      // Force = 2x gravity magnitude, toward touch point
-      const f=gravMag*0.0004*2;
+      // Strong constant pull — 0.035 per unit mass, no distance falloff
+      const f=0.035;
       Body.applyForce(b,b.position,{x:(dx/dist)*f*b.mass,y:(dy/dist)*f*b.mass});
     });
   });
