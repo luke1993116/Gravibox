@@ -336,15 +336,28 @@ function initPhysics(){
   });
   World.add(engine.world,iconBodies);
 
+
   // Magnet force applied each tick
   Events.on(engine,'beforeUpdate',()=>{
     if(!magnetActive||mode!=='physics') return;
     iconBodies.forEach(b=>{
       const dx=magnetX-b.position.x, dy=magnetY-b.position.y;
       const dist=Math.sqrt(dx*dx+dy*dy)+1;
-      // Strong constant pull — 0.035 per unit mass, no distance falloff
-      const f=0.035;
+      const f=0.027; // ~30x gravity
       Body.applyForce(b,b.position,{x:(dx/dist)*f*b.mass,y:(dy/dist)*f*b.mass});
+    });
+  });
+
+  // Collision haptic feedback
+  Events.on(engine,'collisionStart',e=>{
+    if(!navigator.vibrate) return;
+    e.pairs.forEach(pair=>{
+      // Only vibrate for icon-icon collisions, not wall hits
+      if(pair.bodyA.iconIdx===undefined||pair.bodyB.iconIdx===undefined) return;
+      const relVel=pair.collision.depth||1;
+      // Light grain: 10-20ms, scaled by impact strength
+      const dur=Math.min(10+Math.round(relVel*4),22);
+      navigator.vibrate(dur);
     });
   });
 
