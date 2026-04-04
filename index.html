@@ -131,30 +131,22 @@ html,body{
 // ICON DRAWING
 // ─────────────────────────────────────────────
 const ICONS=[
-  {label:'商店',  grad:['#1a8cff','#0055cc'], draw:drawStore},
-  {label:'音乐',  grad:['#cc44ff','#7700cc'],  draw:drawMusic},
-  {label:'相机',  grad:['#888','#444'],         draw:drawCamera},
-  {label:'时钟',  grad:['#333','#111'],          draw:drawClock},
-  {label:'邮件',  grad:['#55aaff','#1a66cc'],  draw:drawMail},
-  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMsg},
-  {label:'电话',  grad:['#44cc44','#228822'],  draw:drawPhone},
-  {label:'导航',  grad:['#3399ff','#1155bb'],  draw:drawCompass},
-  {label:'天气',  grad:['#55aaee','#2277bb'],  draw:drawWeather},
-  {label:'设置',  grad:['#888','#555'],         draw:drawSettings},
-  {label:'股票',  grad:['#0d2233','#1a4466'],  draw:drawStocks},
-  {label:'视频',  grad:['#333','#111'],          draw:drawClapper},
-  {label:'地图',  grad:['#77ccff','#bbe8ff'],  draw:drawMap},
-  {label:'备忘录',grad:['#ffdd44','#ffaa00'],  draw:drawNotes},
-  {label:'播客',  grad:['#aa44ff','#6600cc'],  draw:drawPodcast},
-  {label:'通讯录',grad:['#cc9944','#885500'],  draw:drawContacts},
-  {label:'照片',  grad:['#fff','#ddd'],         draw:drawPhotos},
-  {label:'计算器',grad:['#2a2a2a','#111'],      draw:drawCalc},
-  {label:'健康',  grad:['#ff3366','#cc0044'],  draw:drawHealth},
-  {label:'钱包',  grad:['#1a1a1a','#000'],      draw:drawWallet},
-  {label:'游戏',  grad:['#ff6633','#cc3300'],  draw:drawGame},
-  {label:'雨天',  grad:['#667799','#445566'],  draw:drawRain},
-  {label:'图书',  grad:['#ff8833','#cc5500'],  draw:drawBook},
-  {label:'手电',  grad:['#222','#000'],          draw:drawFlash},
+  {label:'商店',  grad:['#1a8cff','#0055cc'], draw:drawStore},    // 0
+  {label:'音乐',  grad:['#cc44ff','#7700cc'],  draw:drawMusic},    // 1
+  {label:'相机',  grad:['#888','#444'],         draw:drawCamera},   // 2
+  {label:'时钟',  grad:['#333','#111'],          draw:drawClock},    // 3
+  {label:'天气',  grad:['#55aaee','#2277bb'],  draw:drawWeather},  // 4
+  {label:'设置',  grad:['#888','#555'],         draw:drawSettings}, // 5
+  {label:'股票',  grad:['#0d2233','#1a4466'],  draw:drawStocks},   // 6
+  {label:'视频',  grad:['#333','#111'],          draw:drawClapper},  // 7
+  {label:'地图',  grad:['#77ccff','#bbe8ff'],  draw:drawMap},      // 8
+  {label:'备忘录',grad:['#ffdd44','#ffaa00'],  draw:drawNotes},    // 9
+  {label:'播客',  grad:['#aa44ff','#6600cc'],  draw:drawPodcast},  // 10
+  {label:'通讯录',grad:['#cc9944','#885500'],  draw:drawContacts}, // 11
+  {label:'照片',  grad:['#fff','#ddd'],         draw:drawPhotos},   // 12
+  {label:'计算器',grad:['#2a2a2a','#111'],      draw:drawCalc},     // 13
+  {label:'健康',  grad:['#ff3366','#cc0044'],  draw:drawHealth},   // 14
+  {label:'钱包',  grad:['#1a1a1a','#000'],      draw:drawWallet},   // 15
 ];
 
 function _rc(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fill();}
@@ -190,7 +182,7 @@ function drawFlash(c,s){c.fillStyle='#777';_rc(c,s*.38,s*.14,s*.24,s*.58,s*.09);
 // PRE-RENDER to offscreen canvases
 // ─────────────────────────────────────────────
 const IR = 180; // icon render resolution
-const iconCache = ICONS.map(icon => {
+function buildIconCanvas(icon) {
   const oc = document.createElement('canvas');
   oc.width = oc.height = IR;
   const c2 = oc.getContext('2d');
@@ -201,7 +193,12 @@ const iconCache = ICONS.map(icon => {
   const sh=c2.createLinearGradient(0,0,0,S*.5);sh.addColorStop(0,'rgba(255,255,255,.38)');sh.addColorStop(1,'rgba(255,255,255,0)');c2.fillStyle=sh;c2.fillRect(0,0,S,S*.5);
   icon.draw(c2,S);c2.restore();
   return oc;
-});
+}
+// iconCache[0..15] = grid icons, iconCache[16..19] = dock icons
+const iconCache = [
+  ...ICONS.map(buildIconCanvas),
+  ...DOCK_DEFS.map(buildIconCanvas),
+];
 
 // ─────────────────────────────────────────────
 // LAYOUT  (iPhone grid spec)
@@ -360,8 +357,14 @@ function drawWallpaper() {
   ctx.drawImage(wallpaperCache.cvs, 0, 0, W, H);
 }
 
-// ─── Dock icon indices (also participate in physics) ──────────
-const DOCK_ICONS = [5, 6, 4, 7]; // 消息, 电话, 邮件, 导航
+// ─── Dock icon definitions (separate from grid) ──────────
+const DOCK_DEFS = [
+  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMsg},      // cache idx 16
+  {label:'电话',  grad:['#44cc44','#228822'],  draw:drawPhone},    // cache idx 17
+  {label:'邮件',  grad:['#55aaff','#1a66cc'],  draw:drawMail},     // cache idx 18
+  {label:'导航',  grad:['#3399ff','#1155bb'],  draw:drawCompass},  // cache idx 19
+];
+const DOCK_ICONS = [16, 17, 18, 19]; // indices into combined iconCache
 // All icon indices = grid icons + dock icons
 const ALL_ICON_INDICES = [...Array(ICONS.length).keys()];
 function getDockMetrics() {
@@ -457,7 +460,7 @@ function drawIcon(idx, x, y, size, angle, alpha){
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 1;
   ctx.fillStyle = '#fff';
-  ctx.fillText(ICONS[idx].label, 0, size / 2 + fontSize * 1.1);
+  ctx.fillText(idx < ICONS.length ? ICONS[idx].label : DOCK_DEFS[idx-ICONS.length].label, 0, size / 2 + fontSize * 1.1);
   ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
   ctx.globalAlpha = 1;
