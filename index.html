@@ -253,7 +253,10 @@ const wrap=document.getElementById('canvas-wrap');
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
   const r=wrap.getBoundingClientRect();
-  W=r.width; H=r.height;
+  W=r.width||window.innerWidth;
+  H=r.height||(window.innerHeight-wrap.getBoundingClientRect().top)||window.innerHeight;
+  if(W<=0) W=window.innerWidth;
+  if(H<=0) H=window.innerHeight;
   canvas.width=Math.round(W*devicePixelRatio);
   canvas.height=Math.round(H*devicePixelRatio);
   canvas.style.width=W+'px';
@@ -853,10 +856,22 @@ window.addEventListener('resize',()=>{
 });
 
 // ─── START ───────────────────────────────────
-sizeCanvas();
-startRender();   // Immediately draws grid (no physics yet)
-// Pre-init physics engine in background so first tap is instant
-setTimeout(()=>initPhysics(), 400);
+// Wait for layout to complete before reading dimensions
+function init(){
+  sizeCanvas();
+  startRender();
+  setTimeout(()=>{
+    // Re-size after fonts/layout settle, in case initial size was 0
+    sizeCanvas();
+    wallpaperCache=null;
+  }, 100);
+  setTimeout(()=>initPhysics(), 500);
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 // PWA
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone){
