@@ -406,36 +406,34 @@ function drawDock() {
     const ix = dockX + pad + i*(iconSz+gap) + iconSz/2;
     const iy = dockY + pad + iconSz/2;
 
-    ctx.save();
-    ctx.translate(ix, iy);
+    // ── Reflection (offscreen so compositing stays isolated) ──
+    const refH = Math.round(iconSz * 0.45);
+    const oc = document.createElement('canvas');
+    oc.width = iconSz; oc.height = refH;
+    const oc2 = oc.getContext('2d');
+    // Draw icon flipped
+    oc2.save();
+    oc2.translate(0, refH);
+    oc2.scale(1, -1);
+    oc2.drawImage(iconCache[iconIdx], 0, refH - iconSz, iconSz, iconSz);
+    oc2.restore();
+    // Fade out with destination-in on offscreen only
+    const rfg = oc2.createLinearGradient(0, 0, 0, refH);
+    rfg.addColorStop(0,   'rgba(0,0,0,0.30)');
+    rfg.addColorStop(0.5, 'rgba(0,0,0,0.10)');
+    rfg.addColorStop(1,   'rgba(0,0,0,0)');
+    oc2.globalCompositeOperation = 'destination-in';
+    oc2.fillStyle = rfg;
+    oc2.fillRect(0, 0, iconSz, refH);
+    // Draw reflection onto main canvas
+    ctx.drawImage(oc, ix - iconSz/2, iy + iconSz*0.52, iconSz, refH);
 
-    // Icon shadow
+    // ── Icon (drawn after reflection so it's on top) ──
+    ctx.save();
     ctx.shadowColor='rgba(0,0,0,0.5)';
     ctx.shadowBlur=12; ctx.shadowOffsetY=4;
-    ctx.drawImage(iconCache[iconIdx], -iconSz/2, -iconSz/2, iconSz, iconSz);
+    ctx.drawImage(iconCache[iconIdx], ix-iconSz/2, iy-iconSz/2, iconSz, iconSz);
     ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-
-    // ── Reflection below icon ──
-    ctx.save();
-    ctx.translate(0, iconSz*0.55);  // position below icon
-    ctx.scale(1, -0.4);             // flip + squash vertically
-
-    // Fade mask: reflection fades out downward
-    const refGrad = ctx.createLinearGradient(0, 0, 0, iconSz*0.5);
-    refGrad.addColorStop(0,   'rgba(255,255,255,0.22)');
-    refGrad.addColorStop(0.6, 'rgba(255,255,255,0.06)');
-    refGrad.addColorStop(1,   'rgba(255,255,255,0)');
-
-    // Draw icon reflected
-    ctx.globalAlpha = 1;
-    ctx.drawImage(iconCache[iconIdx], -iconSz/2, 0, iconSz, iconSz);
-
-    // Overlay fade mask
-    ctx.globalCompositeOperation = 'destination-in';
-    ctx.fillStyle = refGrad;
-    ctx.fillRect(-iconSz/2, 0, iconSz, iconSz);
-    ctx.restore();
-
     ctx.restore();
   });
 }
