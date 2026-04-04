@@ -24,8 +24,12 @@ html,body{
 #app{position:fixed;inset:0;display:flex;flex-direction:column;}
 
 #header{
-  padding:calc(var(--safe-top)+8px) 16px 6px;
+  padding:calc(max(var(--safe-top), 44px) + 4px) 20px 8px;
   display:flex;align-items:center;justify-content:space-between;z-index:10;flex-shrink:0;
+  background:rgba(28,28,30,0.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  position:relative;
 }
 #header h1{font-size:17px;font-weight:700;color:rgba(255,255,255,.88);letter-spacing:-.3px;}
 .hbtns{display:flex;gap:8px;}
@@ -349,15 +353,71 @@ function initPhysics(){
   });
 
   // Collision haptic feedback
-  Events.on(engine,'collisionStart',e=>{
-    if(!navigator.vibrate) return;
-    e.pairs.forEach(pair=>{
-      // Only vibrate for icon-icon collisions, not wall hits
-      if(pair.bodyA.iconIdx===undefined||pair.bodyB.iconIdx===undefined) return;
-      const relVel=pair.collision.depth||1;
-      // Light grain: 10-20ms, scaled by impact strength
-      const dur=Math.min(10+Math.round(relVel*4),22);
-      navigator.vibrate(dur);
+  let hapticCtx=null, hapticUnlocked=false, lastHapticTime=0;
+
+  // Unlock AudioContext on first user touch (iOS requires gesture)
+  function unlockHaptic(){
+    if(hapticUnlocked) return;
+    try{
+      hapticCtx=new(window.AudioContext||window.webkitAudioContext)();
+      // Play a silent buffer to unlock
+      const buf=hapticCtx.createBuffer(1,1,22050);
+      const src=hapticCtx.createBufferSource();
+      src.buffer=buf; src.connect(hapticCtx.destination); src.start(0);
+      hapticUnlocked=true;
+    }catch(err){}
+  }
+  canvas.addEventListener('touchstart',unlockHaptic,{once:false,passive:true});
+  canvas.addEventListener('mousedown',unlockHaptic,{once:false,passive:true});
+
+  function hapticClick(strength){
+    const now=Date.now();
+    if(now-lastHapticTime<25) return; // throttle
+    lastHapticTime=now;
+    // Android: navigator.vibrate works great
+    if(navigator.vibrate){
+      navigator.vibrate(strength>2?18:strength>1?12:8);
+      return;
+    }
+    // iOS PWA: AudioContext sharp transient — short loud spike then silence
+    // This physically moves the speaker membrane and can trigger the Taptic Engine
+    // on some iPhone models when volume is up
+    if(!hapticCtx||!hapticUnlocked) return;
+    try{
+      if(hapticCtx.state==='suspended') hapticCtx.resume();
+      const sampleRate=hapticCtx.sampleRate;
+      const len=Math.floor(sampleRate*0.012); // 12ms
+      const buf=hapticCtx.createBuffer(1,len,sampleRate);
+      const data=buf.getChannelData(0);
+      const vol=strength>2?0.9:strength>1?0.7:0.5;
+      // Sharp click waveform: spike → ring → silence
+      for(let i=0;i<len;i++){
+        const t=i/sampleRate;
+        const env=Math.exp(-t*400); // fast decay
+        data[i]=Math.sin(2*Math.PI*200*t)*env*vol*(i<3?i/3:1);
+      }
+      const gain=hapticCtx.createGain();
+      gain.gain.value=1.0;
+      const src=hapticCtx.createBufferSource();
+      src.buffer=buf;
+      src.connect(gain);
+      gain.connect(hapticCtx.destination);
+      src.start();
+    }catch(err){}
+  }
+
+  Events.on(engine,'collisionStart',ev=>{
+    ev.pairs.forEach(pair=>{
+      const aIsIcon = pair.bodyA.iconIdx !== undefined;
+      const bIsIcon = pair.bodyB.iconIdx !== undefined;
+      // Fire haptic for icon-icon OR icon-wall collisions
+      if(!aIsIcon && !bIsIcon) return;
+      // Use relative speed as strength indicator
+      const vA = pair.bodyA.speed || 0;
+      const vB = pair.bodyB.speed || 0;
+      const strength = Math.min((vA + vB) / 4, 4);
+      if(strength < 0.3) return; // ignore tiny grazes
+      hapticClick(strength);
     });
   });
 
@@ -455,8 +515,33 @@ function enableGyro(){
     gyroListenerAdded=true;
     window.addEventListener('deviceorientation',e=>{
       if(!gyroOn||mode==='homing'||mode==='magnet') return;
-      engine.gravity.x=Math.sin((e.gamma||0)*Math.PI/180);
-      engine.gravity.y=Math.sin((e.beta||0)*Math.PI/180);
+      // Get screen rotation to correct gravity direction regardless of how phone is held
+      const orient = (screen.orientation && screen.orientation.angle != null)
+        ? screen.orientation.angle
+        : (window.orientation || 0);
+      const beta  = (e.beta  || 0) * Math.PI / 180;
+      const gamma = (e.gamma || 0) * Math.PI / 180;
+      let gx, gy;
+      if (orient === 0 || orient === 360) {
+        // Portrait upright
+        gx =  Math.sin(gamma);
+        gy = -Math.cos(beta) * Math.sign(Math.cos(beta)) * Math.abs(Math.sin(beta)) / Math.abs(Math.sin(beta) || 1);
+        gy =  Math.sin(beta);
+      } else if (orient === 180) {
+        // Portrait upside-down
+        gx = -Math.sin(gamma);
+        gy = -Math.sin(beta);
+      } else if (orient === 90) {
+        // Landscape right
+        gx =  Math.sin(beta);
+        gy = -Math.sin(gamma);
+      } else {
+        // Landscape left (orient === -90 or 270)
+        gx = -Math.sin(beta);
+        gy =  Math.sin(gamma);
+      }
+      engine.gravity.x = gx;
+      engine.gravity.y = gy;
     });
   }
   gyroOn=true;
