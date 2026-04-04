@@ -353,70 +353,29 @@ function initPhysics(){
   });
 
   // Collision haptic feedback
-  let hapticCtx=null, hapticUnlocked=false, lastHapticTime=0;
-
-  // Unlock AudioContext on first user touch (iOS requires gesture)
-  function unlockHaptic(){
-    if(hapticUnlocked) return;
-    try{
-      hapticCtx=new(window.AudioContext||window.webkitAudioContext)();
-      // Play a silent buffer to unlock
-      const buf=hapticCtx.createBuffer(1,1,22050);
-      const src=hapticCtx.createBufferSource();
-      src.buffer=buf; src.connect(hapticCtx.destination); src.start(0);
-      hapticUnlocked=true;
-    }catch(err){}
-  }
-  canvas.addEventListener('touchstart',unlockHaptic,{once:false,passive:true});
-  canvas.addEventListener('mousedown',unlockHaptic,{once:false,passive:true});
-
-  function hapticClick(strength){
-    const now=Date.now();
-    if(now-lastHapticTime<25) return; // throttle
-    lastHapticTime=now;
-    // Android: navigator.vibrate works great
-    if(navigator.vibrate){
-      navigator.vibrate(strength>2?18:strength>1?12:8);
-      return;
-    }
-    // iOS PWA: AudioContext sharp transient — short loud spike then silence
-    // This physically moves the speaker membrane and can trigger the Taptic Engine
-    // on some iPhone models when volume is up
-    if(!hapticCtx||!hapticUnlocked) return;
-    try{
-      if(hapticCtx.state==='suspended') hapticCtx.resume();
-      const sampleRate=hapticCtx.sampleRate;
-      const len=Math.floor(sampleRate*0.012); // 12ms
-      const buf=hapticCtx.createBuffer(1,len,sampleRate);
-      const data=buf.getChannelData(0);
-      const vol=strength>2?0.9:strength>1?0.7:0.5;
-      // Sharp click waveform: spike → ring → silence
-      for(let i=0;i<len;i++){
-        const t=i/sampleRate;
-        const env=Math.exp(-t*400); // fast decay
-        data[i]=Math.sin(2*Math.PI*200*t)*env*vol*(i<3?i/3:1);
-      }
-      const gain=hapticCtx.createGain();
-      gain.gain.value=1.0;
-      const src=hapticCtx.createBufferSource();
-      src.buffer=buf;
-      src.connect(gain);
-      gain.connect(hapticCtx.destination);
-      src.start();
-    }catch(err){}
+  // Android: navigator.vibrate() works perfectly.
+  // iOS: Taptic Engine cannot be triggered from JS/PWA — requires native Swift
+  //      UIImpactFeedbackGenerator. No workaround exists in Safari/WKWebView PWA.
+  let lastHapticTime = 0;
+  function hapticClick(strength) {
+    if (!navigator.vibrate) return; // iOS: silently skip
+    const now = Date.now();
+    if (now - lastHapticTime < 30) return; // throttle ~33/sec max
+    lastHapticTime = now;
+    // Short grain: 8ms light, 14ms medium, 20ms hard
+    const ms = strength > 2 ? 20 : strength > 1 ? 14 : 8;
+    navigator.vibrate(ms);
   }
 
   Events.on(engine,'collisionStart',ev=>{
     ev.pairs.forEach(pair=>{
       const aIsIcon = pair.bodyA.iconIdx !== undefined;
       const bIsIcon = pair.bodyB.iconIdx !== undefined;
-      // Fire haptic for icon-icon OR icon-wall collisions
-      if(!aIsIcon && !bIsIcon) return;
-      // Use relative speed as strength indicator
+      if (!aIsIcon && !bIsIcon) return; // ignore wall-wall
       const vA = pair.bodyA.speed || 0;
       const vB = pair.bodyB.speed || 0;
       const strength = Math.min((vA + vB) / 4, 4);
-      if(strength < 0.3) return; // ignore tiny grazes
+      if (strength < 0.4) return; // ignore micro-grazes
       hapticClick(strength);
     });
   });
@@ -515,31 +474,54 @@ function enableGyro(){
     gyroListenerAdded=true;
     window.addEventListener('deviceorientation',e=>{
       if(!gyroOn||mode==='homing'||mode==='magnet') return;
-      // Get screen rotation to correct gravity direction regardless of how phone is held
+
+      // DeviceOrientationEvent gives beta/gamma in device frame.
+      // beta:  -180..180  (front/back tilt)
+      // gamma: -90..90    (left/right tilt)
+      // alpha: compass heading (we ignore)
+      //
+      // The key insight: when screen faces DOWN, beta flips past ±90°.
+      // We use the raw 3-axis gravity from deviceMotion if available,
+      // otherwise derive from beta/gamma with face-down correction.
+      const beta  = (e.beta  || 0);
+      const gamma = (e.gamma || 0);
+
+      // Detect face-down: |beta| > 90 means screen is pointing downward
+      const faceDown = Math.abs(beta) > 90;
+
+      // Screen orientation angle
       const orient = (screen.orientation && screen.orientation.angle != null)
         ? screen.orientation.angle
-        : (window.orientation || 0);
-      const beta  = (e.beta  || 0) * Math.PI / 180;
-      const gamma = (e.gamma || 0) * Math.PI / 180;
+        : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+      const b = beta  * Math.PI / 180;
+      const g = gamma * Math.PI / 180;
+
       let gx, gy;
+
       if (orient === 0 || orient === 360) {
-        // Portrait upright
-        gx =  Math.sin(gamma);
-        gy = -Math.cos(beta) * Math.sign(Math.cos(beta)) * Math.abs(Math.sin(beta)) / Math.abs(Math.sin(beta) || 1);
-        gy =  Math.sin(beta);
+        // Portrait
+        gx =  Math.sin(g);
+        gy =  Math.sin(b);
+        // Face-down: flip both axes
+        if (faceDown) { gx = -gx; gy = -gy; }
       } else if (orient === 180) {
         // Portrait upside-down
-        gx = -Math.sin(gamma);
-        gy = -Math.sin(beta);
+        gx = -Math.sin(g);
+        gy = -Math.sin(b);
+        if (faceDown) { gx = -gx; gy = -gy; }
       } else if (orient === 90) {
         // Landscape right
-        gx =  Math.sin(beta);
-        gy = -Math.sin(gamma);
+        gx =  Math.sin(b);
+        gy = -Math.sin(g);
+        if (faceDown) { gx = -gx; gy = -gy; }
       } else {
-        // Landscape left (orient === -90 or 270)
-        gx = -Math.sin(beta);
-        gy =  Math.sin(gamma);
+        // Landscape left
+        gx = -Math.sin(b);
+        gy =  Math.sin(g);
+        if (faceDown) { gx = -gx; gy = -gy; }
       }
+
       engine.gravity.x = gx;
       engine.gravity.y = gy;
     });
