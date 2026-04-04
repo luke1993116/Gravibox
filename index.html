@@ -194,11 +194,20 @@ function buildIconCanvas(icon) {
   icon.draw(c2,S);c2.restore();
   return oc;
 }
-// iconCache[0..15] = grid icons, iconCache[16..19] = dock icons
-const iconCache = [
-  ...ICONS.map(buildIconCanvas),
-  ...DOCK_DEFS.map(buildIconCanvas),
+// Build grid icon cache first (DOCK_DEFS defined below, added after)
+const iconCache = ICONS.map(buildIconCanvas);
+
+// ─── Dock icon definitions (separate from grid) ──────────
+// MUST be defined AFTER iconCache so draw functions exist
+const DOCK_DEFS = [
+  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMsg},
+  {label:'电话',  grad:['#44cc44','#228822'],  draw:drawPhone},
+  {label:'邮件',  grad:['#55aaff','#1a66cc'],  draw:drawMail},
+  {label:'导航',  grad:['#3399ff','#1155bb'],  draw:drawCompass},
 ];
+const DOCK_ICONS = [16, 17, 18, 19];
+// Append dock icons to cache (indices 16-19)
+DOCK_DEFS.forEach(icon => iconCache.push(buildIconCanvas(icon)));
 
 // ─────────────────────────────────────────────
 // LAYOUT  (iPhone grid spec)
@@ -253,10 +262,7 @@ const wrap=document.getElementById('canvas-wrap');
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
   const r=wrap.getBoundingClientRect();
-  W=r.width||window.innerWidth;
-  H=r.height||(window.innerHeight-wrap.getBoundingClientRect().top)||window.innerHeight;
-  if(W<=0) W=window.innerWidth;
-  if(H<=0) H=window.innerHeight;
+  W=r.width; H=r.height;
   canvas.width=Math.round(W*devicePixelRatio);
   canvas.height=Math.round(H*devicePixelRatio);
   canvas.style.width=W+'px';
@@ -360,16 +366,7 @@ function drawWallpaper() {
   ctx.drawImage(wallpaperCache.cvs, 0, 0, W, H);
 }
 
-// ─── Dock icon definitions (separate from grid) ──────────
-const DOCK_DEFS = [
-  {label:'消息',  grad:['#33cc44','#1a8829'],  draw:drawMsg},      // cache idx 16
-  {label:'电话',  grad:['#44cc44','#228822'],  draw:drawPhone},    // cache idx 17
-  {label:'邮件',  grad:['#55aaff','#1a66cc'],  draw:drawMail},     // cache idx 18
-  {label:'导航',  grad:['#3399ff','#1155bb'],  draw:drawCompass},  // cache idx 19
-];
-const DOCK_ICONS = [16, 17, 18, 19]; // indices into combined iconCache
-// All icon indices = grid icons + dock icons
-const ALL_ICON_INDICES = [...Array(ICONS.length).keys()];
+
 function getDockMetrics() {
   const sc = Math.min(W/390, 1.3);
   const iconSz = Math.round(62*sc);
@@ -856,22 +853,10 @@ window.addEventListener('resize',()=>{
 });
 
 // ─── START ───────────────────────────────────
-// Wait for layout to complete before reading dimensions
-function init(){
-  sizeCanvas();
-  startRender();
-  setTimeout(()=>{
-    // Re-size after fonts/layout settle, in case initial size was 0
-    sizeCanvas();
-    wallpaperCache=null;
-  }, 100);
-  setTimeout(()=>initPhysics(), 500);
-}
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+sizeCanvas();
+startRender();   // Immediately draws grid (no physics yet)
+// Pre-init physics engine in background so first tap is instant
+setTimeout(()=>initPhysics(), 400);
 
 // PWA
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone){
