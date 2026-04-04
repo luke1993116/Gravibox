@@ -213,10 +213,8 @@ function layout(cw, ch){
   const hg  = Math.round(18 * sc);
   const vg  = Math.round(14 * sc);
   const lh  = Math.round(20 * sc);
-  const top = Math.round(100 * sc);
-  // Leave space for dock at bottom
-  const dockReserve = Math.round((62 + 14*2 + 4 + 34 + 10) * sc);
-  return { ic, hg, vg, lh, top, sc, dockReserve };
+  const top = Math.round(20 * sc);  // tight to top, status bar handled by header
+  return { ic, hg, vg, lh, top, sc };
 }
 function homePos(cw, ch){
   const L = layout(cw, ch);
@@ -224,9 +222,19 @@ function homePos(cw, ch){
   const sx = (cw - totalW) / 2 + L.ic / 2;
   const sy = L.top + L.ic / 2;
   const cellH = L.ic + L.lh + L.vg;
-  return ICONS.map((_,i) => ({
+  // First 24 icons in grid
+  const gridPos = ICONS.map((_,i) => ({
     x: sx + (i % COLS) * (L.ic + L.hg),
     y: sy + Math.floor(i / COLS) * cellH
+  }));
+  return gridPos;
+}
+// Home positions for dock icons (bottom row)
+function dockHomePos(cw, ch){
+  const dm = getDockMetrics();
+  return DOCK_ICONS.map((_, i) => ({
+    x: dm.dockX + dm.pad + i*(dm.iconSz+dm.gap) + dm.iconSz/2,
+    y: dm.dockY + dm.pad + dm.iconSz/2
   }));
 }
 
@@ -352,8 +360,10 @@ function drawWallpaper() {
   ctx.drawImage(wallpaperCache.cvs, 0, 0, W, H);
 }
 
-// ─── Dock icons (4 fixed at bottom) ──────────
+// ─── Dock icon indices (also participate in physics) ──────────
 const DOCK_ICONS = [5, 6, 4, 7]; // 消息, 电话, 邮件, 导航
+// All icon indices = grid icons + dock icons
+const ALL_ICON_INDICES = [...Array(ICONS.length).keys()];
 function getDockMetrics() {
   const sc = Math.min(W/390, 1.3);
   const iconSz = Math.round(62*sc);
@@ -401,41 +411,26 @@ function drawDock() {
   ctx.stroke();
   ctx.restore();
 
-  // ── Draw each dock icon + reflection ──
-  DOCK_ICONS.forEach((iconIdx, i) => {
-    const ix = dockX + pad + i*(iconSz+gap) + iconSz/2;
-    const iy = dockY + pad + iconSz/2;
-
-    // ── Reflection (offscreen so compositing stays isolated) ──
-    const refH = Math.round(iconSz * 0.45);
-    const oc = document.createElement('canvas');
-    oc.width = iconSz; oc.height = refH;
-    const oc2 = oc.getContext('2d');
-    // Draw icon flipped
-    oc2.save();
-    oc2.translate(0, refH);
-    oc2.scale(1, -1);
-    oc2.drawImage(iconCache[iconIdx], 0, refH - iconSz, iconSz, iconSz);
-    oc2.restore();
-    // Fade out with destination-in on offscreen only
-    const rfg = oc2.createLinearGradient(0, 0, 0, refH);
-    rfg.addColorStop(0,   'rgba(0,0,0,0.30)');
-    rfg.addColorStop(0.5, 'rgba(0,0,0,0.10)');
-    rfg.addColorStop(1,   'rgba(0,0,0,0)');
-    oc2.globalCompositeOperation = 'destination-in';
-    oc2.fillStyle = rfg;
-    oc2.fillRect(0, 0, iconSz, refH);
-    // Draw reflection onto main canvas
-    ctx.drawImage(oc, ix - iconSz/2, iy + iconSz*0.52, iconSz, refH);
-
-    // ── Icon (drawn after reflection so it's on top) ──
-    ctx.save();
-    ctx.shadowColor='rgba(0,0,0,0.5)';
-    ctx.shadowBlur=12; ctx.shadowOffsetY=4;
-    ctx.drawImage(iconCache[iconIdx], ix-iconSz/2, iy-iconSz/2, iconSz, iconSz);
-    ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-    ctx.restore();
-  });
+}
+// Draw reflection for a physics icon when it's inside dock zone
+function drawIconReflection(iconIdx, ix, iy, iconSz) {
+  const refH = Math.round(iconSz * 0.40);
+  const oc = document.createElement('canvas');
+  oc.width = iconSz; oc.height = refH;
+  const oc2 = oc.getContext('2d');
+  oc2.save();
+  oc2.translate(0, refH);
+  oc2.scale(1, -1);
+  oc2.drawImage(iconCache[iconIdx], 0, refH - iconSz, iconSz, iconSz);
+  oc2.restore();
+  const rfg = oc2.createLinearGradient(0, 0, 0, refH);
+  rfg.addColorStop(0,   'rgba(0,0,0,0.28)');
+  rfg.addColorStop(0.5, 'rgba(0,0,0,0.08)');
+  rfg.addColorStop(1,   'rgba(0,0,0,0)');
+  oc2.globalCompositeOperation = 'destination-in';
+  oc2.fillStyle = rfg;
+  oc2.fillRect(0, 0, iconSz, refH);
+  ctx.drawImage(oc, ix - iconSz/2, iy + iconSz*0.50, iconSz, refH);
 }
 
 // ─── Draw one icon ───────────────────────────
@@ -482,21 +477,38 @@ function startRender(){
     drawWallpaper();
 
     if(mode==='grid'){
-      // Draw icons at static home positions
+      // Draw dock background first
+      drawDock();
+      // Draw static grid icons
       const homes=homePos(W,H);
       const L=layout(W,H);
       homes.forEach((h,i)=>drawIcon(i,h.x,h.y,L.ic,0,1));
+      // Draw dock icons statically
+      const dockHomes=dockHomePos(W,H);
+      const dm=getDockMetrics();
+      DOCK_ICONS.forEach((iconIdx,i)=>{
+        const {x,y}=dockHomes[i];
+        drawIconReflection(iconIdx,x,y,dm.iconSz);
+        drawIcon(iconIdx,x,y,dm.iconSz,0,1);
+      });
 
     } else if(mode==='physics' || mode==='homing'){
-      // Draw from Matter.js body positions
+      const dm=getDockMetrics();
+      // Draw dock background
+      drawDock();
+      // Draw reflections for icons near dock area
+      iconBodies.forEach(b=>{
+        if(b.position.y > dm.dockY - dm.iconSz*0.3){
+          drawIconReflection(b.iconIdx,b.position.x,b.position.y,dm.iconSz);
+        }
+      });
+      // Draw all icons
       const L=layout(W,H);
       iconBodies.forEach(b=>{
-        drawIcon(b.iconIdx,b.position.x,b.position.y,L.ic,b.angle,1);
+        const sz = b.isDock ? dm.iconSz : L.ic;
+        drawIcon(b.iconIdx,b.position.x,b.position.y,sz,b.angle,1);
       });
     }
-
-    // Dock always on top
-    drawDock();
   })();
 }
 
@@ -504,11 +516,9 @@ function startRender(){
 function buildWalls(){
   walls.forEach(w=>World.remove(engine.world,w));
   const T=80;
-  const dm = getDockMetrics();
-  const floorY = dm.dockY - 4; // floor just above dock
   walls=[
-    Bodies.rectangle(W/2, floorY+T/2, W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
-    Bodies.rectangle(W/2, -T/2,       W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
+    Bodies.rectangle(W/2, H+T/2,  W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
     Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
     Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
   ];
@@ -526,20 +536,31 @@ function initPhysics(){
   Runner.run(mRunner,engine);
   buildWalls();
 
-  // Place icon bodies at home positions
+  // Place icon bodies at home positions (grid + dock)
   const homes=homePos(W,H);
+  const dockHomes=dockHomePos(W,H);
   const L=layout(W,H);
-  iconBodies=ICONS.map((_,i)=>{
+  const dm=getDockMetrics();
+
+  // Grid icons
+  const gridBodies=ICONS.map((_,i)=>{
     const b=Bodies.rectangle(homes[i].x,homes[i].y,L.ic,L.ic,{
-      restitution:.45,
-      friction:.55,
-      frictionAir:.018,
-      density:.002,
-      // Start completely static — gravity will move them once we set it
+      restitution:.45, friction:.55, frictionAir:.018, density:.002,
     });
-    b.iconIdx=i;
+    b.iconIdx=i; b.isDock=false;
     return b;
   });
+
+  // Dock icons
+  const dockBodies=DOCK_ICONS.map((iconIdx,i)=>{
+    const b=Bodies.rectangle(dockHomes[i].x,dockHomes[i].y,dm.iconSz,dm.iconSz,{
+      restitution:.45, friction:.55, frictionAir:.018, density:.002,
+    });
+    b.iconIdx=iconIdx; b.isDock=true; b.dockSlot=i;
+    return b;
+  });
+
+  iconBodies=[...gridBodies,...dockBodies];
   World.add(engine.world,iconBodies);
 
 
@@ -599,16 +620,16 @@ function initPhysics(){
 // Just switch gravity on and set mode.
 function goPhysics(){
   if(!engine) initPhysics();
-  // Reset all bodies to home, zero velocity
   const homes=homePos(W,H);
+  const dockHomes=dockHomePos(W,H);
   iconBodies.forEach((b,i)=>{
-    Body.setPosition(b,{x:homes[i].x,y:homes[i].y});
+    const pos = b.isDock ? dockHomes[b.dockSlot] : homes[i];
+    Body.setPosition(b,{x:pos.x,y:pos.y});
     Body.setVelocity(b,{x:0,y:0});
     Body.setAngle(b,0);
     Body.setAngularVelocity(b,0);
   });
   mode='physics';
-  // Gravity pulls them down immediately
   engine.gravity.x=0;
   engine.gravity.y=1;
   setBadge('重力模式 · 倾斜手机','rgba(255,255,255,.5)');
@@ -622,6 +643,7 @@ function goHome(){
   magnetActive=false;
   engine.gravity.x=0; engine.gravity.y=0;
   const targets=homePos(W,H);
+  const dockHomes=dockHomePos(W,H);
   setBadge('🏠 归位中…','rgba(255,210,60,.9)');
   if(homingUnsub){Events.off(engine,'beforeUpdate',homingUnsub);homingUnsub=null;}
   clearTimeout(homingTimeout);
@@ -630,7 +652,8 @@ function goHome(){
     ticks++;
     let done=true;
     iconBodies.forEach((b,i)=>{
-      const dx=targets[i].x-b.position.x, dy=targets[i].y-b.position.y;
+      const home = b.isDock ? dockHomes[b.dockSlot] : targets[i];
+      const dx=home.x-b.position.x, dy=home.y-b.position.y;
       Body.applyForce(b,b.position,{x:dx*.009,y:dy*.009});
       Body.setVelocity(b,{x:b.velocity.x*.82,y:b.velocity.y*.82});
       Body.setAngularVelocity(b,b.angularVelocity*.75);
@@ -643,11 +666,13 @@ function goHome(){
   homingTimeout=setTimeout(()=>finishHoming(targets),3500);
 }
 function finishHoming(targets){
-  if(!homingUnsub) return; // already finished
+  if(!homingUnsub) return;
   Events.off(engine,'beforeUpdate',homingUnsub); homingUnsub=null;
   clearTimeout(homingTimeout);
+  const dockHomes=dockHomePos(W,H);
   iconBodies.forEach((b,i)=>{
-    Body.setPosition(b,{x:targets[i].x,y:targets[i].y});
+    const pos = b.isDock ? dockHomes[b.dockSlot] : targets[i];
+    Body.setPosition(b,{x:pos.x,y:pos.y});
     Body.setVelocity(b,{x:0,y:0});
     Body.setAngle(b,0);
     Body.setAngularVelocity(b,0);
