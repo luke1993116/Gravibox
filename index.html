@@ -266,10 +266,10 @@ let wallpaperCache = null;
 
 function buildWallpaper() {
   const oc = document.createElement('canvas');
-  const pw = Math.round(W * devicePixelRatio);
-  const ph = Math.round(H * devicePixelRatio);
-  oc.width = pw; oc.height = ph;
+  // Use CSS pixel size — ctx already has dpr transform applied
+  oc.width = W; oc.height = H;
   const c2 = oc.getContext('2d');
+  const pw = W, ph = H;
 
   // ── Base gradient: deep blue-purple ──
   const bg = c2.createLinearGradient(pw * 0.3, 0, pw * 0.7, ph);
