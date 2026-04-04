@@ -383,37 +383,37 @@ function getDockMetrics() {
 function drawDock() {
   const m = getDockMetrics();
   const { iconSz, gap, pad, dockH, dockW, dockX, dockY, sc } = m;
-  const r = Math.round(20*sc); // corner radius
+  const r = Math.round(20*sc);
 
-  // ── Dock background: frosted glass ──
-  ctx.save();
-  // Rounded rect clip
-  ctx.beginPath();
-  ctx.moveTo(dockX+r, dockY);
-  ctx.lineTo(dockX+dockW-r, dockY);
-  ctx.quadraticCurveTo(dockX+dockW, dockY, dockX+dockW, dockY+r);
-  ctx.lineTo(dockX+dockW, dockY+dockH-r);
-  ctx.quadraticCurveTo(dockX+dockW, dockY+dockH, dockX+dockW-r, dockY+dockH);
-  ctx.lineTo(dockX+r, dockY+dockH);
-  ctx.quadraticCurveTo(dockX, dockY+dockH, dockX, dockY+dockH-r);
-  ctx.lineTo(dockX, dockY+r);
-  ctx.quadraticCurveTo(dockX, dockY, dockX+r, dockY);
-  ctx.closePath();
+  // Build rounded rect path helper
+  function dockPath() {
+    ctx.beginPath();
+    ctx.moveTo(dockX+r, dockY);
+    ctx.lineTo(dockX+dockW-r, dockY);
+    ctx.quadraticCurveTo(dockX+dockW, dockY, dockX+dockW, dockY+r);
+    ctx.lineTo(dockX+dockW, dockY+dockH-r);
+    ctx.quadraticCurveTo(dockX+dockW, dockY+dockH, dockX+dockW-r, dockY+dockH);
+    ctx.lineTo(dockX+r, dockY+dockH);
+    ctx.quadraticCurveTo(dockX, dockY+dockH, dockX, dockY+dockH-r);
+    ctx.lineTo(dockX, dockY+r);
+    ctx.quadraticCurveTo(dockX, dockY, dockX+r, dockY);
+    ctx.closePath();
+  }
 
-  // Frosted glass fill
+  // Fill — no clip needed, just fill the path
   const dg = ctx.createLinearGradient(dockX, dockY, dockX, dockY+dockH);
   dg.addColorStop(0,   'rgba(255,255,255,0.22)');
   dg.addColorStop(0.5, 'rgba(200,220,255,0.14)');
   dg.addColorStop(1,   'rgba(180,200,255,0.10)');
+  dockPath();
   ctx.fillStyle = dg;
   ctx.fill();
 
-  // Top highlight line
+  // Stroke border
+  dockPath();
   ctx.strokeStyle = 'rgba(255,255,255,0.35)';
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.restore();
-
 }
 // Draw reflection for a physics icon when it's inside dock zone
 function drawIconReflection(iconIdx, ix, iy, iconSz) {
