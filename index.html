@@ -208,14 +208,15 @@ const iconCache = ICONS.map(icon => {
 // ─────────────────────────────────────────────
 const COLS=4;
 function layout(cw, ch){
-  // Scale based on width relative to standard iPhone 390pt wide
   const sc = Math.min(cw / 390, 1.3);
-  const ic  = Math.round(60 * sc);   // icon size
-  const hg  = Math.round(18 * sc);   // horizontal gap between icons
-  const vg  = Math.round(14 * sc);   // vertical gap (icon bottom to label top to next icon)
-  const lh  = Math.round(20 * sc);   // label height
-  const top = Math.round(100 * sc);  // top offset: status bar (~44pt) + a bit of breathing room
-  return { ic, hg, vg, lh, top, sc };
+  const ic  = Math.round(60 * sc);
+  const hg  = Math.round(18 * sc);
+  const vg  = Math.round(14 * sc);
+  const lh  = Math.round(20 * sc);
+  const top = Math.round(100 * sc);
+  // Leave space for dock at bottom
+  const dockReserve = Math.round((62 + 14*2 + 4 + 34 + 10) * sc);
+  return { ic, hg, vg, lh, top, sc, dockReserve };
 }
 function homePos(cw, ch){
   const L = layout(cw, ch);
@@ -255,53 +256,188 @@ function sizeCanvas(){
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
 }
 
-// ─── Draw iOS wallpaper background ──────────
+// ─── Wallpaper + Dock ────────────────────────
 let wallpaperCache = null;
-function drawWallpaper() {
-  if (wallpaperCache && wallpaperCache.w === W && wallpaperCache.h === H) {
-    ctx.drawImage(wallpaperCache.img, 0, 0, W, H);
-    return;
-  }
-  // Build offscreen wallpaper
+
+function buildWallpaper() {
   const oc = document.createElement('canvas');
-  oc.width = Math.round(W * devicePixelRatio);
-  oc.height = Math.round(H * devicePixelRatio);
+  const pw = Math.round(W * devicePixelRatio);
+  const ph = Math.round(H * devicePixelRatio);
+  oc.width = pw; oc.height = ph;
   const c2 = oc.getContext('2d');
-  const sw = oc.width, sh = oc.height;
 
-  // Deep blue iOS-style gradient (similar to iOS 7 default wallpaper)
-  const grad = c2.createLinearGradient(0, 0, sw * 0.4, sh);
-  grad.addColorStop(0,   '#3a5f8a');
-  grad.addColorStop(0.3, '#1e3f6e');
-  grad.addColorStop(0.6, '#0f2a52');
-  grad.addColorStop(1,   '#0a1e3d');
-  c2.fillStyle = grad;
-  c2.fillRect(0, 0, sw, sh);
+  // ── Base gradient: deep blue-purple ──
+  const bg = c2.createLinearGradient(pw * 0.3, 0, pw * 0.7, ph);
+  bg.addColorStop(0,   '#1a2a4a');
+  bg.addColorStop(0.4, '#0e1f3a');
+  bg.addColorStop(0.8, '#0a1830');
+  bg.addColorStop(1,   '#060f22');
+  c2.fillStyle = bg;
+  c2.fillRect(0, 0, pw, ph);
 
-  // Subtle bokeh circles (like iOS wallpaper blurred dots)
-  const dots = [
-    [0.15,0.12,0.18,'rgba(100,160,255,0.18)'],
-    [0.75,0.08,0.22,'rgba(80,130,220,0.14)'],
-    [0.88,0.35,0.15,'rgba(120,180,255,0.12)'],
-    [0.05,0.55,0.20,'rgba(60,120,200,0.15)'],
-    [0.60,0.72,0.25,'rgba(100,150,230,0.13)'],
-    [0.35,0.88,0.16,'rgba(80,140,220,0.16)'],
-    [0.90,0.82,0.19,'rgba(100,170,255,0.11)'],
-    [0.45,0.25,0.12,'rgba(140,190,255,0.10)'],
+  // ── Large blurred light orbs (bokeh base) ──
+  const orbs = [
+    [0.20, 0.18, 0.38, 'rgba(60,120,220,0.22)'],
+    [0.75, 0.12, 0.32, 'rgba(80,100,200,0.18)'],
+    [0.85, 0.60, 0.30, 'rgba(40,80,180,0.16)'],
+    [0.10, 0.72, 0.35, 'rgba(50,100,200,0.18)'],
+    [0.50, 0.45, 0.40, 'rgba(30,70,160,0.14)'],
+    [0.65, 0.85, 0.28, 'rgba(60,110,210,0.15)'],
   ];
-  dots.forEach(([cx, cy, r, col]) => {
-    const grad2 = c2.createRadialGradient(sw*cx, sh*cy, 0, sw*cx, sh*cy, Math.min(sw,sh)*r);
-    grad2.addColorStop(0, col);
-    grad2.addColorStop(1, 'rgba(0,0,0,0)');
-    c2.fillStyle = grad2;
-    c2.fillRect(0, 0, sw, sh);
+  orbs.forEach(([cx,cy,r,col]) => {
+    const g2 = c2.createRadialGradient(pw*cx,ph*cy,0, pw*cx,ph*cy, Math.min(pw,ph)*r);
+    g2.addColorStop(0, col); g2.addColorStop(1,'rgba(0,0,0,0)');
+    c2.fillStyle = g2; c2.fillRect(0,0,pw,ph);
   });
 
-  // Cache as image
-  const img = new Image();
-  img.src = oc.toDataURL('image/jpeg', 0.92);
-  wallpaperCache = { img, w: W, h: H };
-  ctx.drawImage(oc, 0, 0, W, H, 0, 0, W, H);
+  // ── Water-droplet / glass texture ──
+  // Simulate wet glass with small elliptical refraction patches
+  const drops = [
+    [0.12,0.22,18,28],[0.38,0.15,22,32],[0.68,0.28,16,24],
+    [0.82,0.18,20,30],[0.25,0.52,24,36],[0.55,0.42,18,26],
+    [0.78,0.55,22,34],[0.08,0.68,16,22],[0.45,0.78,20,30],
+    [0.88,0.72,18,28],[0.30,0.88,24,34],[0.62,0.92,16,24],
+    [0.15,0.38,20,28],[0.72,0.38,18,26],[0.50,0.62,22,32],
+    [0.92,0.42,16,24],[0.35,0.65,20,28],[0.18,0.82,18,26],
+  ];
+  drops.forEach(([cx,cy,rw,rh]) => {
+    const x=pw*cx, y=ph*cy;
+    const sc2=Math.min(pw,ph)/390;
+    const drw=rw*sc2, drh=rh*sc2;
+    c2.save();
+    c2.beginPath();
+    c2.ellipse(x, y, drw, drh, Math.random()*Math.PI, 0, Math.PI*2);
+    c2.clip();
+    // Inner refraction: slightly lighter top, darker bottom
+    const dg = c2.createLinearGradient(x,y-drh, x,y+drh);
+    dg.addColorStop(0,   'rgba(180,220,255,0.13)');
+    dg.addColorStop(0.4, 'rgba(100,160,230,0.08)');
+    dg.addColorStop(0.7, 'rgba(20,50,120,0.10)');
+    dg.addColorStop(1,   'rgba(10,30,80,0.15)');
+    c2.fillStyle = dg; c2.fillRect(x-drw,y-drh,drw*2,drh*2);
+    // Specular highlight at top of drop
+    const sg = c2.createRadialGradient(x-drw*0.2, y-drh*0.5, 0, x-drw*0.2, y-drh*0.5, drw*0.7);
+    sg.addColorStop(0,   'rgba(255,255,255,0.28)');
+    sg.addColorStop(0.5, 'rgba(200,230,255,0.08)');
+    sg.addColorStop(1,   'rgba(0,0,0,0)');
+    c2.fillStyle = sg; c2.fillRect(x-drw,y-drh,drw*2,drh*2);
+    // Thin rim
+    c2.strokeStyle='rgba(160,200,255,0.18)'; c2.lineWidth=0.8*sc2;
+    c2.stroke();
+    c2.restore();
+  });
+
+  // ── Fine noise grain overlay for glass feel ──
+  // Use a small repeated pattern
+  const noiseOc = document.createElement('canvas');
+  noiseOc.width=64; noiseOc.height=64;
+  const nc = noiseOc.getContext('2d');
+  const nid = nc.createImageData(64,64);
+  for(let i=0;i<nid.data.length;i+=4){
+    const v=Math.random()*20|0;
+    nid.data[i]=nid.data[i+1]=nid.data[i+2]=v;
+    nid.data[i+3]=18;
+  }
+  nc.putImageData(nid,0,0);
+  const pat = c2.createPattern(noiseOc,'repeat');
+  c2.fillStyle=pat; c2.fillRect(0,0,pw,ph);
+
+  return oc;
+}
+
+function drawWallpaper() {
+  if (!wallpaperCache || wallpaperCache.w !== W || wallpaperCache.h !== H) {
+    wallpaperCache = { cvs: buildWallpaper(), w: W, h: H };
+  }
+  ctx.drawImage(wallpaperCache.cvs, 0, 0, W, H);
+}
+
+// ─── Dock icons (4 fixed at bottom) ──────────
+const DOCK_ICONS = [5, 6, 4, 7]; // 消息, 电话, 邮件, 导航
+function getDockMetrics() {
+  const sc = Math.min(W/390, 1.3);
+  const iconSz = Math.round(62*sc);
+  const gap    = Math.round(18*sc);
+  const pad    = Math.round(14*sc);       // horizontal padding inside dock
+  const safeB  = 34*sc;                   // bottom safe area approx
+  const dockH  = iconSz + pad*2 + Math.round(4*sc);
+  const dockW  = 4*iconSz + 3*gap + pad*2;
+  const dockX  = (W - dockW) / 2;
+  const dockY  = H - dockH - safeB - Math.round(6*sc);
+  return { iconSz, gap, pad, dockH, dockW, dockX, dockY, sc };
+}
+
+function drawDock() {
+  const m = getDockMetrics();
+  const { iconSz, gap, pad, dockH, dockW, dockX, dockY, sc } = m;
+  const r = Math.round(20*sc); // corner radius
+
+  // ── Dock background: frosted glass ──
+  ctx.save();
+  // Rounded rect clip
+  ctx.beginPath();
+  ctx.moveTo(dockX+r, dockY);
+  ctx.lineTo(dockX+dockW-r, dockY);
+  ctx.quadraticCurveTo(dockX+dockW, dockY, dockX+dockW, dockY+r);
+  ctx.lineTo(dockX+dockW, dockY+dockH-r);
+  ctx.quadraticCurveTo(dockX+dockW, dockY+dockH, dockX+dockW-r, dockY+dockH);
+  ctx.lineTo(dockX+r, dockY+dockH);
+  ctx.quadraticCurveTo(dockX, dockY+dockH, dockX, dockY+dockH-r);
+  ctx.lineTo(dockX, dockY+r);
+  ctx.quadraticCurveTo(dockX, dockY, dockX+r, dockY);
+  ctx.closePath();
+
+  // Frosted glass fill
+  const dg = ctx.createLinearGradient(dockX, dockY, dockX, dockY+dockH);
+  dg.addColorStop(0,   'rgba(255,255,255,0.22)');
+  dg.addColorStop(0.5, 'rgba(200,220,255,0.14)');
+  dg.addColorStop(1,   'rgba(180,200,255,0.10)');
+  ctx.fillStyle = dg;
+  ctx.fill();
+
+  // Top highlight line
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Draw each dock icon + reflection ──
+  DOCK_ICONS.forEach((iconIdx, i) => {
+    const ix = dockX + pad + i*(iconSz+gap) + iconSz/2;
+    const iy = dockY + pad + iconSz/2;
+
+    ctx.save();
+    ctx.translate(ix, iy);
+
+    // Icon shadow
+    ctx.shadowColor='rgba(0,0,0,0.5)';
+    ctx.shadowBlur=12; ctx.shadowOffsetY=4;
+    ctx.drawImage(iconCache[iconIdx], -iconSz/2, -iconSz/2, iconSz, iconSz);
+    ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+    // ── Reflection below icon ──
+    ctx.save();
+    ctx.translate(0, iconSz*0.55);  // position below icon
+    ctx.scale(1, -0.4);             // flip + squash vertically
+
+    // Fade mask: reflection fades out downward
+    const refGrad = ctx.createLinearGradient(0, 0, 0, iconSz*0.5);
+    refGrad.addColorStop(0,   'rgba(255,255,255,0.22)');
+    refGrad.addColorStop(0.6, 'rgba(255,255,255,0.06)');
+    refGrad.addColorStop(1,   'rgba(255,255,255,0)');
+
+    // Draw icon reflected
+    ctx.globalAlpha = 1;
+    ctx.drawImage(iconCache[iconIdx], -iconSz/2, 0, iconSz, iconSz);
+
+    // Overlay fade mask
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillStyle = refGrad;
+    ctx.fillRect(-iconSz/2, 0, iconSz, iconSz);
+    ctx.restore();
+
+    ctx.restore();
+  });
 }
 
 // ─── Draw one icon ───────────────────────────
@@ -360,6 +496,9 @@ function startRender(){
         drawIcon(b.iconIdx,b.position.x,b.position.y,L.ic,b.angle,1);
       });
     }
+
+    // Dock always on top
+    drawDock();
   })();
 }
 
@@ -367,9 +506,11 @@ function startRender(){
 function buildWalls(){
   walls.forEach(w=>World.remove(engine.world,w));
   const T=80;
+  const dm = getDockMetrics();
+  const floorY = dm.dockY - 4; // floor just above dock
   walls=[
-    Bodies.rectangle(W/2, H+T/2,  W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
-    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
+    Bodies.rectangle(W/2, floorY+T/2, W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W/2, -T/2,       W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
     Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
     Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
   ];
@@ -681,6 +822,7 @@ function setBadge(t,c){
 // ─── RESIZE ──────────────────────────────────
 window.addEventListener('resize',()=>{
   sizeCanvas();
+  wallpaperCache=null;
   if(engine) buildWalls();
 });
 
