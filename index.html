@@ -22,11 +22,12 @@ html,body{
   overflow:hidden;font-family:-apple-system,sans-serif;
   touch-action:none;user-select:none;-webkit-user-select:none;
 }
-#app{position:fixed;inset:0;display:flex;flex-direction:column;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:transparent;z-index:1;}
 
 #header{
   padding:calc(max(var(--safe-top), 44px) + 4px) 20px 8px;
-  display:flex;align-items:center;justify-content:space-between;z-index:10;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:10;flex-shrink:0;
   background:transparent;
   position:relative;
 }
@@ -43,11 +44,12 @@ html,body{
 
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
 
-/* THE ONLY canvas — always visible */
+/* Canvas covers FULL screen behind everything */
 #c{
-  position:absolute;inset:0;
+  position:fixed;inset:0;
   width:100%;height:100%;
   display:block;
+  z-index:0;
 }
 
 #footer{
@@ -85,10 +87,10 @@ html,body{
 
 /* Badge */
 #badge{
-  position:absolute;bottom:calc(var(--safe-bottom)+10px);left:50%;transform:translateX(-50%);
+  position:fixed;bottom:calc(var(--safe-bottom)+10px);left:50%;transform:translateX(-50%);
   background:rgba(0,0,0,.35);border-radius:20px;padding:4px 16px;
   font-size:11px;color:rgba(255,255,255,.6);pointer-events:none;
-  white-space:nowrap;z-index:5;transition:opacity .3s;
+  white-space:nowrap;z-index:15;transition:opacity .3s;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 </style>
@@ -219,7 +221,7 @@ function layout(cw, ch){
   const hg  = Math.round(18 * sc);
   const vg  = Math.round(14 * sc);
   const lh  = Math.round(20 * sc);
-  const top = Math.round(20 * sc);  // tight to top, status bar handled by header
+  const top = Math.round(100 * sc); // below header buttons
   return { ic, hg, vg, lh, top, sc };
 }
 function homePos(cw, ch){
@@ -261,8 +263,9 @@ const wrap=document.getElementById('canvas-wrap');
 
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
-  const r=wrap.getBoundingClientRect();
-  W=r.width; H=r.height;
+  // Canvas is fixed full-screen, so use window dimensions
+  W=window.innerWidth;
+  H=window.innerHeight;
   canvas.width=Math.round(W*devicePixelRatio);
   canvas.height=Math.round(H*devicePixelRatio);
   canvas.style.width=W+'px';
