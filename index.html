@@ -18,9 +18,19 @@
 }
 html,body{
   width:100%;height:100%;
-  background:#b8bec4;
+  background:#a8b8bc; /* matches wallpaper bottom edge — no grey gap */
   overflow:hidden;font-family:-apple-system,sans-serif;
   touch-action:none;user-select:none;-webkit-user-select:none;
+}
+#c{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  /* Also cover any dynamic viewport gap on iOS Safari */
+  min-height:100dvh;
+  min-height:100vh;
+  width:100%;
+  display:block;
+  z-index:0;
 }
 #app{position:fixed;inset:0;display:flex;flex-direction:column;background:transparent;z-index:1;}
 
@@ -43,14 +53,6 @@ html,body{
 .hbtn.on{background:rgba(80,200,120,.3);color:#66dd88;}
 
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
-
-/* Canvas covers FULL screen behind everything */
-#c{
-  position:fixed;inset:0;
-  width:100%;height:100%;
-  display:block;
-  z-index:0;
-}
 
 #footer{
   padding:4px 16px calc(var(--safe-bottom)+4px);
@@ -263,14 +265,16 @@ const wrap=document.getElementById('canvas-wrap');
 
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
-  // Canvas is fixed full-screen, so use window dimensions
-  W=window.innerWidth;
-  H=window.innerHeight;
-  canvas.width=Math.round(W*devicePixelRatio);
-  canvas.height=Math.round(H*devicePixelRatio);
-  canvas.style.width=W+'px';
-  canvas.style.height=H+'px';
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  W = window.innerWidth;
+  // Use dvh (dynamic viewport) to cover the full screen including Safari's bottom gap
+  H = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  // Ensure we cover at least innerHeight (some browsers report less)
+  H = Math.max(H, window.innerHeight);
+  canvas.width  = Math.round(W * devicePixelRatio);
+  canvas.height = Math.round(H * devicePixelRatio);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 }
 
 // ─── Wallpaper ───────────────────────────────
