@@ -221,7 +221,7 @@ function layout(cw, ch){
   const hg  = Math.round(18 * sc);
   const vg  = Math.round(14 * sc);
   const lh  = Math.round(20 * sc);
-  const top = Math.round(20 * sc);  // tight to top, status bar handled by header
+  const top = Math.round(90 * sc);  // below status bar + header buttons
   return { ic, hg, vg, lh, top, sc };
 }
 function homePos(cw, ch){
@@ -305,7 +305,7 @@ function getDockMetrics() {
   const iconSz = Math.round(62*sc);
   const gap    = Math.round(18*sc);
   const pad    = Math.round(14*sc);       // horizontal padding inside dock
-  const safeB  = 34*sc;                   // bottom safe area approx
+  const safeB  = 88*sc;                   // bottom safe area: Safari toolbar + home indicator
   const dockH  = iconSz + pad*2 + Math.round(4*sc);
   const dockW  = 4*iconSz + 3*gap + pad*2;
   const dockX  = (W - dockW) / 2;
@@ -452,9 +452,12 @@ function startRender(){
 function buildWalls(){
   walls.forEach(w=>World.remove(engine.world,w));
   const T=80;
+  const dm=getDockMetrics();
+  // Floor just above dock so icons stack there, not in grey area below
+  const floorY = dm.dockY - 4;
   walls=[
-    Bodies.rectangle(W/2, H+T/2,  W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
-    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
+    Bodies.rectangle(W/2, floorY+T/2, W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W/2, -T/2,       W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
     Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
     Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
   ];
@@ -713,9 +716,9 @@ canvas.addEventListener('mousemove',e=>{
 
 // ─── MAGNET (touch to attract) ──────────────
 function getCanvasPos(e){
-  const r=canvas.getBoundingClientRect();
-  const src=e.touches?e.touches[0]:e;
-  return{x:src.clientX-r.left,y:src.clientY-r.top};
+  // Canvas is position:fixed full-screen, so clientX/Y == canvas coords
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX, y: src.clientY };
 }
 canvas.addEventListener('touchstart',e=>{
   if(mode!=='physics') return;
