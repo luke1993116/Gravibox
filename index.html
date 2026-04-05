@@ -22,7 +22,7 @@ html,body{
   overflow:hidden;font-family:-apple-system,sans-serif;
   touch-action:none;user-select:none;-webkit-user-select:none;
 }
-#app{position:fixed;inset:0;display:flex;flex-direction:column;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1;pointer-events:none;}
 
 #header{
   padding:calc(max(var(--safe-top), 44px) + 4px) 20px 8px;
@@ -37,17 +37,22 @@ html,body{
   background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);
   font-size:15px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:background .15s,transform .1s;
+  pointer-events:all;
 }
 .hbtn:active{background:rgba(255,255,255,.25);transform:scale(.9);}
 .hbtn.on{background:rgba(80,200,120,.3);color:#66dd88;}
 
 #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
 
-/* THE ONLY canvas — always visible */
+/* Canvas covers full screen behind all UI */
 #c{
-  position:absolute;inset:0;
-  width:100%;height:100%;
+  position:fixed;
+  top:0;left:0;
+  width:100vw;
+  height:100vh;
+  height:100lvh;
   display:block;
+  z-index:0;
 }
 
 #footer{
@@ -258,12 +263,13 @@ const wrap=document.getElementById('canvas-wrap');
 
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
-  const r=wrap.getBoundingClientRect();
-  W=r.width; H=r.height;
-  canvas.width=Math.round(W*devicePixelRatio);
-  canvas.height=Math.round(H*devicePixelRatio);
-  canvas.style.width=W+'px';
-  canvas.style.height=H+'px';
+  // Use full screen dimensions — canvas is position:fixed behind all UI
+  W = window.innerWidth;
+  H = window.screen.height; // full physical screen height, covers status bar
+  canvas.width  = Math.round(W * devicePixelRatio);
+  canvas.height = Math.round(H * devicePixelRatio);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
 }
 
