@@ -445,6 +445,17 @@ function startRender(){
         const sz = b.isDock ? dm.iconSz : L.ic;
         drawIcon(b.iconIdx,b.position.x,b.position.y,sz,b.angle,1);
       });
+      // Draw magnet touch indicator
+      if(magnetActive){
+        const r1=28, r2=52;
+        const grad=ctx.createRadialGradient(magnetX,magnetY,r1,magnetX,magnetY,r2);
+        grad.addColorStop(0,'rgba(80,220,255,0.45)');
+        grad.addColorStop(1,'rgba(80,220,255,0)');
+        ctx.beginPath();ctx.arc(magnetX,magnetY,r2,0,Math.PI*2);
+        ctx.fillStyle=grad;ctx.fill();
+        ctx.beginPath();ctx.arc(magnetX,magnetY,r1,0,Math.PI*2);
+        ctx.strokeStyle='rgba(80,220,255,0.8)';ctx.lineWidth=2;ctx.stroke();
+      }
     }
   })();
 }
@@ -503,7 +514,7 @@ function initPhysics(){
 
   // Magnet force applied each tick
   Events.on(engine,'beforeUpdate',()=>{
-    if(!magnetActive||mode!=='physics') return;
+    if(!magnetActive || !iconBodies.length) return;
     iconBodies.forEach(b=>{
       const dx=magnetX-b.position.x, dy=magnetY-b.position.y;
       const dist=Math.sqrt(dx*dx+dy*dy)+1;
@@ -719,15 +730,17 @@ function getCanvasPos(e){
   return { x: src.clientX, y: src.clientY };
 }
 canvas.addEventListener('touchstart',e=>{
-  if(mode!=='physics') return;
   e.preventDefault();
+  // Auto-enter physics if in grid mode
+  if(mode==='grid') goPhysics();
+  if(mode==='homing') return;
   const p=getCanvasPos(e);
   magnetActive=true; magnetX=p.x; magnetY=p.y;
   setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
 },{passive:false});
 canvas.addEventListener('touchmove',e=>{
-  if(!magnetActive) return;
   e.preventDefault();
+  if(!magnetActive) return;
   const p=getCanvasPos(e);
   magnetX=p.x; magnetY=p.y;
 },{passive:false});
@@ -737,7 +750,8 @@ canvas.addEventListener('touchend',e=>{
 },{passive:false});
 // Desktop: click-hold to magnet
 canvas.addEventListener('mousedown',e=>{
-  if(mode!=='physics') return;
+  if(mode==='grid') goPhysics();
+  if(mode==='homing') return;
   const p=getCanvasPos(e);
   magnetActive=true; magnetX=p.x; magnetY=p.y;
   setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
