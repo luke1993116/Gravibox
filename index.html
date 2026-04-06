@@ -304,12 +304,12 @@ function getDockMetrics() {
   const sc = Math.min(W/390, 1.3);
   const iconSz = Math.round(62*sc);
   const gap    = Math.round(18*sc);
-  const pad    = Math.round(14*sc);       // horizontal padding inside dock
-  const safeB  = 88*sc;                   // bottom safe area: Safari toolbar + home indicator
+  const pad    = Math.round(14*sc);
   const dockH  = iconSz + pad*2 + Math.round(4*sc);
   const dockW  = 4*iconSz + 3*gap + pad*2;
   const dockX  = (W - dockW) / 2;
-  const dockY  = H - dockH - safeB - Math.round(6*sc);
+  // 固定在画布底部，留 20px 边距（不猜 safeB）
+  const dockY  = H - dockH - Math.round(20*sc);
   return { iconSz, gap, pad, dockH, dockW, dockX, dockY, sc };
 }
 
@@ -452,12 +452,9 @@ function startRender(){
 function buildWalls(){
   walls.forEach(w=>World.remove(engine.world,w));
   const T=80;
-  const dm=getDockMetrics();
-  // Floor just above dock so icons stack there, not in grey area below
-  const floorY = dm.dockY - 4;
   walls=[
-    Bodies.rectangle(W/2, floorY+T/2, W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
-    Bodies.rectangle(W/2, -T/2,       W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
+    Bodies.rectangle(W/2, H+T/2,  W+T*2, T, {isStatic:true,friction:.6,restitution:.3}),
+    Bodies.rectangle(W/2, -T/2,   W+T*2, T, {isStatic:true,friction:.6,restitution:.1}),
     Bodies.rectangle(-T/2,  H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
     Bodies.rectangle(W+T/2, H/2,  T, H+T*2, {isStatic:true,friction:.6,restitution:.3}),
   ];
