@@ -263,9 +263,9 @@ const wrap=document.getElementById('canvas-wrap');
 
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
-  // Use full screen dimensions — canvas is position:fixed behind all UI
-  W = window.innerWidth;
-  H = window.screen.height; // full physical screen height, covers status bar
+  const r = wrap.getBoundingClientRect();
+  W = r.width  || window.innerWidth;
+  H = r.height || window.innerHeight;
   canvas.width  = Math.round(W * devicePixelRatio);
   canvas.height = Math.round(H * devicePixelRatio);
   canvas.style.width  = W + 'px';
@@ -308,8 +308,9 @@ function getDockMetrics() {
   const dockH  = iconSz + pad*2 + Math.round(4*sc);
   const dockW  = 4*iconSz + 3*gap + pad*2;
   const dockX  = (W - dockW) / 2;
-  // 固定在画布底部，留 20px 边距（不猜 safeB）
-  const dockY  = H - dockH - Math.round(20*sc);
+  // 留出底部安全区：home indicator ~34px
+  const safeB  = Math.round(34 * sc);
+  const dockY  = H - dockH - safeB;
   return { iconSz, gap, pad, dockH, dockW, dockX, dockY, sc };
 }
 
@@ -713,9 +714,12 @@ canvas.addEventListener('mousemove',e=>{
 
 // ─── MAGNET (touch to attract) ──────────────
 function getCanvasPos(e){
-  // Canvas is position:fixed full-screen, so clientX/Y == canvas coords
+  const r = canvas.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
-  return { x: src.clientX, y: src.clientY };
+  return {
+    x: src.clientX - r.left,
+    y: src.clientY - r.top
+  };
 }
 canvas.addEventListener('touchstart',e=>{
   if(mode!=='physics') return;
