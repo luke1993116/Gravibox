@@ -551,15 +551,7 @@ function initPhysics(){
     });
   });
 
-  // Touch drag
-  const mouse=Mouse.create(canvas);
-  mouse.pixelRatio=devicePixelRatio;
-  const mc=MouseConstraint.create(engine,{
-    mouse,
-    constraint:{stiffness:.3,render:{visible:false}}
-  });
-  World.add(engine.world,mc);
-  // Prevent scroll
+  // Note: no MouseConstraint — we handle touch via document-level magnet events
   canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
 }
 
@@ -723,48 +715,51 @@ canvas.addEventListener('mousemove',e=>{
   // On desktop without gyro, mouse position drives gravity
 });
 
+
 // ─── MAGNET (touch to attract) ──────────────
 function getCanvasPos(e){
-  // canvas is fixed at top:0 left:0, so clientX/Y == canvas coords
   const src = e.touches ? e.touches[0] : e;
   return { x: src.clientX, y: src.clientY };
 }
-canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  // Auto-enter physics if in grid mode
+
+// Bind to document so no overlay can block it
+document.addEventListener('touchstart',e=>{
+  // Ignore taps on header buttons
+  if(e.target.closest && e.target.closest('#header,#gyro-prompt,#install-bar')) return;
   if(mode==='grid') goPhysics();
   if(mode==='homing') return;
   const p=getCanvasPos(e);
   magnetActive=true; magnetX=p.x; magnetY=p.y;
   setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
-},{passive:false});
-canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
+},{passive:true});
+document.addEventListener('touchmove',e=>{
   if(!magnetActive) return;
   const p=getCanvasPos(e);
   magnetX=p.x; magnetY=p.y;
-},{passive:false});
-canvas.addEventListener('touchend',e=>{
+},{passive:true});
+document.addEventListener('touchend',e=>{
   magnetActive=false;
   if(mode==='physics') setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
-},{passive:false});
-// Desktop: click-hold to magnet
-canvas.addEventListener('mousedown',e=>{
+},{passive:true});
+// Desktop
+document.addEventListener('mousedown',e=>{
+  if(e.target.closest && e.target.closest('#header,#gyro-prompt,#install-bar')) return;
   if(mode==='grid') goPhysics();
   if(mode==='homing') return;
   const p=getCanvasPos(e);
   magnetActive=true; magnetX=p.x; magnetY=p.y;
   setBadge('🧲 磁吸中','rgba(80,220,255,.9)');
 });
-canvas.addEventListener('mousemove',e=>{
+document.addEventListener('mousemove',e=>{
   if(!magnetActive) return;
   const p=getCanvasPos(e);
   magnetX=p.x; magnetY=p.y;
 });
-canvas.addEventListener('mouseup',()=>{
+document.addEventListener('mouseup',()=>{
   magnetActive=false;
   if(mode==='physics') setBadge(gyroOn?'🌀 陀螺仪':'重力模式','rgba(255,255,255,.5)');
 });
+
 
 // ─── SHAKE DETECTION ─────────────────────────
 let lastAccel={x:0,y:0,z:0},shakeCnt=0,lastShakeT=0;
