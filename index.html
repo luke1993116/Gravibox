@@ -263,9 +263,9 @@ const wrap=document.getElementById('canvas-wrap');
 
 // ─── Canvas sizing ───────────────────────────
 function sizeCanvas(){
-  const r = wrap.getBoundingClientRect();
-  W = r.width  || window.innerWidth;
-  H = r.height || window.innerHeight;
+  // canvas is position:fixed 100vw x 100vh — use window dimensions
+  W = window.innerWidth;
+  H = window.innerHeight;
   canvas.width  = Math.round(W * devicePixelRatio);
   canvas.height = Math.round(H * devicePixelRatio);
   canvas.style.width  = W + 'px';
@@ -714,12 +714,9 @@ canvas.addEventListener('mousemove',e=>{
 
 // ─── MAGNET (touch to attract) ──────────────
 function getCanvasPos(e){
-  const r = canvas.getBoundingClientRect();
+  // canvas is fixed at top:0 left:0, so clientX/Y == canvas coords
   const src = e.touches ? e.touches[0] : e;
-  return {
-    x: src.clientX - r.left,
-    y: src.clientY - r.top
-  };
+  return { x: src.clientX, y: src.clientY };
 }
 canvas.addEventListener('touchstart',e=>{
   if(mode!=='physics') return;
